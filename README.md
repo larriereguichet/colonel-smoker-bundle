@@ -11,7 +11,7 @@ By default, the bundle used the routes declared in the Symfony routing.
 ## Installation
 
 ```bash
-composer require lag/colonel-smoker-bundle 
+composer require lag/colonel-smoker-bundle:dev-master
 ```
 
 ## Usage
