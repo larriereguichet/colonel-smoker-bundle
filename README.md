@@ -1,5 +1,7 @@
 # Colonel Smoker Bundle
 
+![logo](https://vignette.wikia.nocookie.net/onepiece/images/1/1c/Smoker_Anime_Pre_Timeskip_Infobox.png/revision/latest?cb=20160102184944 | width=50)
+
 The Colonel Smoker is an expert in smoke. He can say if your application is smoking before deploying it in production.
 
 The Colonel Smoker bundle will search into the urls of your Symfony application (only Symfony is supported now), call 
