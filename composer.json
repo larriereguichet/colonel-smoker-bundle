@@ -1,0 +1,37 @@
+{
+    "name": "lag/colonel-smoker-bundle",
+    "description": "The Colonel helps you to check the smoke in your application",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Arnaud Frézet",
+            "email": "arnaudfrezet@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LAG\\SmokerBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LAG\\AdminBundle\\Tests\\": "tests/SmokerBundle/"
+        }
+    },
+    "require": {
+        "php": "^7.2",
+        "symfony/dependency-injection": "^4.1",
+        "symfony/http-kernel": "^4.1",
+        "symfony/console": "^4.1",
+        "symfony/filesystem": "^4.1",
+        "fabpot/goutte": "^3.2",
+        "symfony/routing": "^4.1",
+        "symfony/config": "^4.1",
+        "doctrine/doctrine-bundle": "^1.9",
+        "symfony/options-resolver": "^4.1",
+        "symfony/property-access": "^4.1",
+        "doctrine/orm": "^2.6",
+        "twig/twig": "^2.5"
+    }
+}
