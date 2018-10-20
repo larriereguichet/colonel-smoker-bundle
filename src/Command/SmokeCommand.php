@@ -109,7 +109,7 @@ class SmokeCommand extends Command
 
         $io->note('Generating results report...');
         $this->generateResults();
-        $io->text('The results report has been generated here '.$this->cacheDir.'/smoker/results.html');
+        $io->text('The results report has been generated here file://'.$this->cacheDir.'/smoker/results.html');
     }
 
     protected function getLineCount(string $cacheFile)
@@ -240,7 +240,7 @@ class SmokeCommand extends Command
             return unserialize($serializedData);
         }, $errorData);
 
-        $content = $this->twig->render('@JKSmoker/Results/results.html.twig', [
+        $content = $this->twig->render('@LAGSmoker/Results/results.html.twig', [
             'successData' => $successData,
             'errorData' => $errorData,
         ]);
