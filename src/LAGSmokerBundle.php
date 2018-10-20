@@ -7,7 +7,7 @@ use LAG\SmokerBundle\DependencyInjection\JKSmokerExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class JKSmokerBundle extends Bundle
+class LAGSmokerBundle extends Bundle
 {
     public function getContainerExtension()
     {
