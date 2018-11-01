@@ -2,11 +2,53 @@
 
 namespace LAG\SmokerBundle\Message;
 
+use Symfony\Component\Filesystem\Filesystem;
+
 class MessageCollector implements MessageCollectorInterface
 {
     private $errors = [];
     private $success = [];
     private $warnings = [];
+
+    /**
+     * @var Filesystem
+     */
+    private $fileSystem;
+
+    private $cacheFile;
+
+    /**
+     * MessageCollector constructor.
+     *
+     * @param string $cacheDirectory
+     */
+    public function __construct(string $cacheDirectory)
+    {
+        $this->cacheFile = $cacheDirectory.'/smoker/smoker.messages';
+        $this->fileSystem = new Filesystem();
+        $this->fileSystem->dumpFile($this->cacheFile, '');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function flush(): void
+    {
+        foreach ($this->errors as $error) {
+            $this->fileSystem->appendToFile($this->cacheFile, 'ERROR='.serialize($error).PHP_EOL);
+        }
+        $this->errors = [];
+
+        foreach ($this->warnings as $warning) {
+            $this->fileSystem->appendToFile($this->cacheFile, 'WARNING='.serialize($warning).PHP_EOL);
+        }
+        $this->warnings = [];
+
+        foreach ($this->success as $success) {
+            $this->fileSystem->appendToFile($this->cacheFile, 'SUCCESS='.serialize($success).PHP_EOL);
+        }
+        $this->success = [];
+    }
 
     /**
      * @inheritdoc

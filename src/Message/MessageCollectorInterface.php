@@ -47,4 +47,9 @@ interface MessageCollectorInterface
      * @return array
      */
     public function getWarnings(): array;
+
+    /**
+     * Flush the messages into the messages cache file.
+     */
+    public function flush(): void;
 }
