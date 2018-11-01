@@ -1,0 +1,19 @@
+language: php
+
+php:
+    - 7.2
+
+before_install:
+    - echo "memory_limit=3G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+    - mysql -e "create database IF NOT EXISTS symfony;"
+    - mysql -e "create database IF NOT EXISTS symfony_test;"
+
+install:
+    - composer install --dev
+    - wget https://scrutinizer-ci.com/ocular.phar
+
+script:
+  - bin/phpunit --coverage-text --coverage-clover=coverage.clover
+
+after_script:
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
