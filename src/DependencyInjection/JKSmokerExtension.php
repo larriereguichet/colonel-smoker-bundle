@@ -21,5 +21,6 @@ class JKSmokerExtension extends Extension
         $loader->load('services.yaml');
 
         $container->setParameter('jk_smoker.mapping', $config['mapping']);
+        $container->setParameter('jk_smoker.providers', $config['providers']);
     }
 }
