@@ -7,6 +7,8 @@ use LAG\SmokerBundle\Tests\BaseTestCase;
 
 class MessageCollectorTest extends BaseTestCase
 {
+    private $cacheDirectory = __DIR__.'/../../../var/cache/';
+
     public function testServiceExists()
     {
         $this->assertServiceExists(MessageCollector::class);
@@ -16,7 +18,7 @@ class MessageCollectorTest extends BaseTestCase
     {
         $exception = new \Exception();
 
-        $collector = new MessageCollector();
+        $collector = new MessageCollector($this->cacheDirectory);
         $collector->addError('A beautiful error', 666, $exception);
 
         $this->assertCount(1, $collector->getErrors());
@@ -29,7 +31,7 @@ class MessageCollectorTest extends BaseTestCase
 
     public function testAddSuccess()
     {
-        $collector = new MessageCollector();
+        $collector = new MessageCollector($this->cacheDirectory);
         $collector->addSuccess('Everything is wonderful');
 
         $this->assertCount(1, $collector->getSuccess());
@@ -40,7 +42,7 @@ class MessageCollectorTest extends BaseTestCase
 
     public function testAddWarning()
     {
-        $collector = new MessageCollector();
+        $collector = new MessageCollector($this->cacheDirectory);
         $collector->addWarning('Warning ! Nuclear launch detected');
 
         $this->assertCount(0, $collector->getSuccess());
