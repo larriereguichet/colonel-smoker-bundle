@@ -2,12 +2,14 @@
 
 namespace LAG\SmokerBundle\Command;
 
+use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class GenerateCacheCommand extends Command
 {
@@ -17,15 +19,29 @@ class GenerateCacheCommand extends Command
      * @var UrlProviderRegistry
      */
     protected $registry;
+
     /**
      * @var string
      */
     protected $cacheDir;
 
-    public function __construct(string $cacheDir, UrlProviderRegistry $registry)
+    /**
+     * @var array
+     */
+    protected $providerConfiguration;
+
+    /**
+     * GenerateCacheCommand constructor.
+     *
+     * @param string              $cacheDir
+     * @param array               $providerConfiguration
+     * @param UrlProviderRegistry $registry
+     */
+    public function __construct(string $cacheDir, array $providerConfiguration, UrlProviderRegistry $registry)
     {
         $this->registry = $registry;
         $this->cacheDir = $cacheDir;
+        $this->providerConfiguration = $providerConfiguration;
 
         parent::__construct();
     }
@@ -33,7 +49,7 @@ class GenerateCacheCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Add a short description for your command')
+            ->setDescription('Generate the urls cache used in the smoke tests. Urls are gathered by the urls providers')
         ;
     }
 
@@ -41,20 +57,28 @@ class GenerateCacheCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        // Initialize the cache file
         $cacheFile = $this->cacheDir.'/smoker/smoker.cache';
-
         $fileSystem = new Filesystem();
         $fileSystem->dumpFile($cacheFile, '');
 
-        foreach ($this->registry->all() as $providerName => $provider) {
-            $io->text('Processing "'.$providerName.'" url provider');
-            $io->progressStart($provider->getCollection()->count());
+        // Gather and configure the urls providers
+        $providers = $this->getProviders();
+        $atLeastOneUrlProvided = false;
 
+        foreach ($providers as $providerName => $providerData) {
+            $io->text('Processing "'.$providerName.'" url provider...');
 
-            foreach ($provider->getCollection()->all() as $urlItem) {
+            $provider = $providerData['provider'];
+            $options = $providerData['options'];
+
+            $io->progressStart($provider->getCollection($options)->count());
+
+            foreach ($provider->getCollection($options)->all() as $urlItem) {
                 $providerCache = $urlItem->serialize()."\n";
                 $fileSystem->appendToFile($cacheFile, $providerCache);
                 $io->progressAdvance();
+                $atLeastOneUrlProvided = true;
             }
             $io->progressFinish();
 
@@ -83,6 +107,38 @@ class GenerateCacheCommand extends Command
                 }
             }
         }
-        $io->success('The cache has been generated in '.$cacheFile);
+
+        if ($atLeastOneUrlProvided) {
+            $io->success('The cache has been generated in '.$cacheFile);
+        } else {
+            $io->warning('No url was found in the configured url providers');
+        }
+    }
+
+    /**
+     * @return UrlProviderInterface[][]
+     */
+    protected function getProviders(): array
+    {
+        $providers = $this->registry->all();
+        $allowedProviders = [];
+        $resolver = new OptionsResolver();
+
+        foreach ($providers as $id => $provider) {
+            $resolver->clear();
+
+            if (key_exists($id, $this->providerConfiguration)) {
+                if (null === $this->providerConfiguration[$id]) {
+                    $this->providerConfiguration[$id] = [];
+                }
+                $provider->configureOptions($resolver);
+                $options = $resolver->resolve($this->providerConfiguration[$id]);
+
+                $allowedProviders[$id]['provider'] = $provider;
+                $allowedProviders[$id]['options'] = $options;
+            }
+        }
+
+        return $allowedProviders;
     }
 }
