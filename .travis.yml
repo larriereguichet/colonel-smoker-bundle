@@ -9,7 +9,7 @@ before_install:
     - mysql -e "create database IF NOT EXISTS symfony_test;"
 
 install:
-    - composer install --dev
+    - composer install
     - wget https://scrutinizer-ci.com/ocular.phar
 
 script:
