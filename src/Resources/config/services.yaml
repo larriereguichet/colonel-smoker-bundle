@@ -4,6 +4,7 @@ services:
         class: LAG\SmokerBundle\Command\GenerateCacheCommand
         arguments:
             - '%kernel.cache_dir%'
+            - '%jk_smoker.providers%'
             - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
         tags:
             - {name: console.command}
@@ -20,8 +21,8 @@ services:
     ########################
 
     ### Providers ###
-    LAG\SmokerBundle\Url\Provider\RoutingUrlProvider:
-        class: LAG\SmokerBundle\Url\Provider\RoutingUrlProvider
+    LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider:
+        class: LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider
         arguments:
             - '@router'
             - '@LAG\SmokerBundle\Requirements\Registry\RequirementsProviderRegistry'
@@ -45,8 +46,6 @@ services:
 
     LAG\SmokerBundle\Url\Registry\UrlProviderRegistry:
         class: LAG\SmokerBundle\Url\Registry\UrlProviderRegistry
-        calls:
-            - ['add', ['default', '@LAG\SmokerBundle\Url\Provider\RoutingUrlProvider']]
     ##################
 
     ### Response handlers ###
