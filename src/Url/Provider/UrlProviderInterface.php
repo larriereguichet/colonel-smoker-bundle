@@ -9,6 +9,24 @@ interface UrlProviderInterface
 {
     public function getCollection(array $options = []): UrlCollection;
 
+    /**
+     * Return the route matching the given path.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    public function match(string $path): string;
+
+    /**
+     * Return true if the given path is supported by the provider.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function supports(string $path): bool;
+
     public function configureOptions(OptionsResolver $resolver): void;
 
     /**
@@ -17,8 +35,4 @@ interface UrlProviderInterface
      * @return string
      */
     public function getName(): string;
-
-    public function getErrorMessages(): array;
-
-    public function getIgnoredMessages(): array;
 }

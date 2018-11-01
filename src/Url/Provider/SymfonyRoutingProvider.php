@@ -8,6 +8,9 @@ use LAG\SmokerBundle\Url\Url;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\NoConfigurationException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
 class SymfonyRoutingProvider implements UrlProviderInterface
@@ -43,15 +46,52 @@ class SymfonyRoutingProvider implements UrlProviderInterface
      */
     protected $registry;
 
+    /**
+     * SymfonyRoutingProvider constructor.
+     *
+     * @param RouterInterface              $router
+     * @param RequirementsProviderRegistry $registry
+     */
     public function __construct(RouterInterface $router, RequirementsProviderRegistry $registry)
     {
         $this->router = $router;
         $this->registry = $registry;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getName(): string
     {
         return 'symfony';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function supports(string $path): bool
+    {
+        try {
+            $this->router->match($path);
+        } catch (NoConfigurationException $exception) {
+            return false;
+        } catch (ResourceNotFoundException $exception) {
+            return false;
+        } catch (MethodNotAllowedException $exception) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function match(string $path): string
+    {
+        $pathInfo = $this->router->match($path);
+
+        return $pathInfo['_route'];
     }
 
     public function configureOptions(OptionsResolver $resolver): void
