@@ -15,7 +15,6 @@ use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\RouterInterface;
 
 class SmokeCommand extends Command
 {
@@ -202,6 +201,13 @@ class SmokeCommand extends Command
         $this->fileSystem->dumpFile($this->cacheDir.'/smoker/results.html', $content);
     }
 
+    /**
+     * @param string $location
+     *
+     * @param bool   $stopOnFailure
+     *
+     * @throws \Exception
+     */
     private function processRow(string $location, bool $stopOnFailure): void
     {
         $this->io->write('Processing '.$location.'...');
