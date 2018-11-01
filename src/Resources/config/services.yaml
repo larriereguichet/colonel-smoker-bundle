@@ -14,7 +14,8 @@ services:
         arguments:
             - '%kernel.cache_dir%'
             - '@LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry'
-            - '@router'
+            - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
+            - '@LAG\SmokerBundle\Message\MessageCollector'
             - '@twig'
         tags:
             - {name: console.command}
@@ -56,4 +57,6 @@ services:
     ### Message ###
     LAG\SmokerBundle\Message\MessageCollector:
         class: LAG\SmokerBundle\Message\MessageCollector
+        arguments:
+            - '%kernel.cache_dir%'
     ###############
