@@ -52,3 +52,8 @@ services:
     LAG\SmokerBundle\Response\Handler\SuccessResponseHandler:
         class: LAG\SmokerBundle\Response\Handler\SuccessResponseHandler
     #########################
+
+    ### Message ###
+    LAG\SmokerBundle\Message\MessageCollector:
+        class: LAG\SmokerBundle\Message\MessageCollector
+    ###############
