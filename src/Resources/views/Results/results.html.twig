@@ -10,7 +10,18 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <table class="table">
+
+                <h2>Successful tests</h2>
+
+                <a href="#"
+                   class="show-link"
+                   data-target="#success-table">
+                    Show
+                </a>
+
+                <table id="success-table"
+                       class="table"
+                       style="display: none">
                     <thead>
                     <tr>
                         <th>Url</th>
@@ -65,5 +76,24 @@
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.show-link').on('click', function () {
+                let target = $($(this).data('target'));
+                target.toggle();
+            });
+        });
+    </script>
 </body>
 </html>
