@@ -2,6 +2,7 @@
 
 namespace LAG\SmokerBundle\Command;
 
+use LAG\SmokerBundle\Message\MessageCollectorInterface;
 use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use Symfony\Component\Console\Command\Command;
@@ -31,19 +32,35 @@ class GenerateCacheCommand extends Command
     protected $providerConfiguration;
 
     /**
+     * @var Filesystem
+     */
+    protected $fileSystem;
+
+    /**
+     * @var MessageCollectorInterface
+     */
+    protected $messageCollector;
+
+    /**
      * GenerateCacheCommand constructor.
      *
-     * @param string              $cacheDir
-     * @param array               $providerConfiguration
-     * @param UrlProviderRegistry $registry
+     * @param string                    $cacheDir
+     * @param array                     $providerConfiguration
+     * @param UrlProviderRegistry       $registry
+     * @param MessageCollectorInterface $messageCollector
      */
-    public function __construct(string $cacheDir, array $providerConfiguration, UrlProviderRegistry $registry)
-    {
+    public function __construct(
+        string $cacheDir,
+        array $providerConfiguration,
+        UrlProviderRegistry $registry,
+        MessageCollectorInterface $messageCollector
+    ) {
         $this->registry = $registry;
         $this->cacheDir = $cacheDir;
         $this->providerConfiguration = $providerConfiguration;
 
         parent::__construct();
+        $this->messageCollector = $messageCollector;
     }
 
     protected function configure()
@@ -55,61 +72,39 @@ class GenerateCacheCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->fileSystem = new Filesystem();
+        $this->messageCollector->initialize();
         $io = new SymfonyStyle($input, $output);
+        $io->title('Smoker Generate Cache Command');
 
         // Initialize the cache file
-        $cacheFile = $this->cacheDir.'/smoker/smoker.cache';
-        $fileSystem = new Filesystem();
-        $fileSystem->dumpFile($cacheFile, '');
+        $io->text('Creating cache file...');
+        $cacheFile = $this->createCacheFile();
 
         // Gather and configure the urls providers
+        $io->text('Fetching urls providers...');
         $providers = $this->getProviders();
-        $atLeastOneUrlProvided = false;
+        $urlCount = 0;
 
         foreach ($providers as $providerName => $providerData) {
-            $io->text('Processing "'.$providerName.'" url provider...');
-
+            $io->text('Processing the url provider "'.$providerName.'"...');
             $provider = $providerData['provider'];
             $options = $providerData['options'];
+            $urls = $provider->getCollection($options);
 
-            $io->progressStart($provider->getCollection($options)->count());
+            $io->progressStart($urls->count());
 
-            foreach ($provider->getCollection($options)->all() as $urlItem) {
+            foreach ($urls->all() as $urlItem) {
                 $providerCache = $urlItem->serialize()."\n";
-                $fileSystem->appendToFile($cacheFile, $providerCache);
+                $this->fileSystem->appendToFile($cacheFile, $providerCache);
                 $io->progressAdvance();
-                $atLeastOneUrlProvided = true;
+                $urlCount++;
             }
             $io->progressFinish();
-
-            if (0 < count($provider->getIgnoredMessages())) {
-                if ($io->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $warning = 'The following url have been ignored : '."\n";
-                    foreach ($provider->getIgnoredMessages() as $routeName => $message) {
-                        $warning .= $routeName.': "'.$message.'"'."\n";
-                    }
-                    $io->warning($warning);
-                } else {
-                    $io->warning('Some urls are ignored. Run with -v to have more information');
-                }
-            }
-
-            if (0 < count($provider->getErrorMessages())) {
-                if ($io->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                    $error = 'The following url have been in error :'."\n";
-
-                    foreach ($provider->getErrorMessages() as $routeName => $message) {
-                        $error .= $routeName.': "'.$message.'"'."\n";
-                    }
-                    $io->error($error);
-                } else {
-                    $io->warning('Some urls are in error. Run with -v to have more information');
-                }
-            }
         }
 
-        if ($atLeastOneUrlProvided) {
-            $io->success('The cache has been generated in '.$cacheFile);
+        if ($urlCount > 0) {
+            $io->success('The cache has been generated with '.$urlCount.' urls in '.$cacheFile);
         } else {
             $io->warning('No url was found in the configured url providers');
         }
@@ -140,5 +135,13 @@ class GenerateCacheCommand extends Command
         }
 
         return $allowedProviders;
+    }
+
+    protected function createCacheFile(): string
+    {
+        $cacheFile = $this->cacheDir.'/smoker/smoker.cache';
+        $this->fileSystem->dumpFile($cacheFile, '');
+
+        return $cacheFile;
     }
 }
