@@ -29,13 +29,13 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for data in successData %}
+                    {% for message in messages.success %}
                         <tr>
                             <td>
-                                {{ data.url }}
+                                {{ message.url }}
                             </td>
                             <td>
-                                {{ data.responseCode }}
+                                {{ message.code }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -44,29 +44,72 @@
 
                 <br><br>
 
-                <table class="table">
+                <h2>Warning tests</h2>
+
+                <a href="#"
+                   class="show-link"
+                   data-target="#warning-table">
+                    Show
+                </a>
+
+                <table id="warning-table"
+                       class="table"
+                       style="display: none">
+                    <thead>
+                    <tr>
+                        <th>Url</th>
+                        <th>Status</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for message in messages.warnings %}
+                        <tr>
+                            <td>
+                                {{ message.url }}
+                            </td>
+                            <td>
+                                {{ message.code }}
+                            </td>
+                            <td>
+                                {{ message.message }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <br><br>
+
+                <h2>Error tests</h2>
+
+                <a href="#"
+                   class="show-link"
+                   data-target="#error-table">
+                    Show
+                </a>
+
+                <table id="error-table"
+                       class="table"
+                       style="display: none">
                     <thead>
                         <tr>
                             <th>Url</th>
                             <th>Status</th>
-                            <th>Handler</th>
                             <th>Message</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for data in errorData %}
+                    {% for message in messages.errors %}
                         <tr>
                             <td>
-                                {{ data.url }}
+                                {{ message.url }}
                             </td>
                             <td>
-                                {{ data.responseCode }}
+                                {{ message.code }}
                             </td>
                             <td>
-                                {{ data.handler }}
-                            </td>
-                            <td>
-                                {{ data.message }}
+                                {{ message.message }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -92,6 +135,13 @@
             $('.show-link').on('click', function () {
                 let target = $($(this).data('target'));
                 target.toggle();
+
+                console.log($(this).text().trim());
+                if ($(this).text().trim() === 'Show') {
+                    $(this).text('Hide');
+                } else {
+                    $(this).text('Show');
+                }
             });
         });
     </script>
