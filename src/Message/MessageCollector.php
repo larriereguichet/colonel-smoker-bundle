@@ -10,6 +10,8 @@ class MessageCollector implements MessageCollectorInterface
     private $success = [];
     private $warnings = [];
 
+    const LINE_SEPARATOR = '###END###'.PHP_EOL;
+
     /**
      * @var Filesystem
      */
@@ -33,23 +35,52 @@ class MessageCollector implements MessageCollectorInterface
         $this->fileSystem->dumpFile($this->cacheFile, '');
     }
 
+    public function read(): array
+    {
+        $messages = [
+            'success' => [],
+            'errors' => [],
+            'warnings' => [],
+        ];
+        $content = file_get_contents($this->cacheFile);
+        $data = explode(self::LINE_SEPARATOR, $content);
+
+        foreach ($data as $messageData) {
+            $messageData = explode('=', $messageData);
+
+            if ('ERROR' === $messageData[0]) {
+                $messages['errors'][] = unserialize($messageData[1]);
+            }
+
+            if ('WARNING' === $messageData[0]) {
+                $messages['warnings'][] = unserialize($messageData[1]);
+            }
+
+            if ('SUCCESS' === $messageData[0]) {
+                $messages['success'][] = unserialize($messageData[1]);
+            }
+        }
+
+        return $messages;
+    }
+
     /**
      * @inheritdoc
      */
     public function flush(): void
     {
         foreach ($this->errors as $error) {
-            $this->fileSystem->appendToFile($this->cacheFile, 'ERROR='.serialize($error).PHP_EOL);
+            $this->fileSystem->appendToFile($this->cacheFile, 'ERROR='.serialize($error).self::LINE_SEPARATOR);
         }
         $this->errors = [];
 
         foreach ($this->warnings as $warning) {
-            $this->fileSystem->appendToFile($this->cacheFile, 'WARNING='.serialize($warning).PHP_EOL);
+            $this->fileSystem->appendToFile($this->cacheFile, 'WARNING='.serialize($warning).self::LINE_SEPARATOR);
         }
         $this->warnings = [];
 
         foreach ($this->success as $success) {
-            $this->fileSystem->appendToFile($this->cacheFile, 'SUCCESS='.serialize($success).PHP_EOL);
+            $this->fileSystem->appendToFile($this->cacheFile, 'SUCCESS='.serialize($success).self::LINE_SEPARATOR);
         }
         $this->success = [];
     }
@@ -57,15 +88,16 @@ class MessageCollector implements MessageCollectorInterface
     /**
      * @inheritdoc
      */
-    public function addError(string $message, int $code = 500, \Exception $exception = null): void
+    public function addError(string $url, string $message, int $code = 500, \Exception $exception = null): void
     {
         $error = [
+            'url' => $url,
             'message' => $message,
             'code' => $code,
         ];
 
         if (null !== $exception) {
-            $error['exception'] = $exception;
+            $error['stacktrace'] = $exception->getTraceAsString();
         }
         $this->errors[] = $error;
     }
@@ -73,17 +105,25 @@ class MessageCollector implements MessageCollectorInterface
     /**
      * @inheritdoc
      */
-    public function addSuccess(string $message): void
+    public function addSuccess(string $url, string $message, int $code = 200): void
     {
-        $this->success[] = $message;
+        $this->success[] = [
+            'url' => $url,
+            'message' => $message,
+            'code' => $code,
+        ];
     }
 
     /**
      * @inheritdoc
      */
-    public function addWarning(string $message): void
+    public function addWarning(string $url, string $message, int $code = 200): void
     {
-        $this->warnings[] = $message;
+        $this->warnings[] = [
+            'url' => $url,
+            'message' => $message,
+            'code' => $code,
+        ];
     }
 
     /**
