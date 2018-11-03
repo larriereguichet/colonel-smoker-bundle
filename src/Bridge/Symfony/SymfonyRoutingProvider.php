@@ -1,9 +1,10 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Provider;
+namespace LAG\SmokerBundle\Bridge\Symfony;
 
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
 use LAG\SmokerBundle\Requirements\Registry\RequirementsProviderRegistry;
+use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Url;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
@@ -74,10 +75,13 @@ class SymfonyRoutingProvider implements UrlProviderInterface
         try {
             $this->router->match($path);
         } catch (NoConfigurationException $exception) {
+
             return false;
         } catch (ResourceNotFoundException $exception) {
+
             return false;
         } catch (MethodNotAllowedException $exception) {
+
             return false;
         }
 
