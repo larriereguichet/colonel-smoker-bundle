@@ -5,6 +5,11 @@ namespace LAG\SmokerBundle\Message;
 interface MessageCollectorInterface
 {
     /**
+     * Initialize the messages cache file.
+     */
+    public function initialize(): void;
+
+    /**
      * Add a new error message, and optional error code and exception.
      *
      * @param string          $message

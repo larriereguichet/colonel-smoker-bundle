@@ -26,6 +26,10 @@ class MessageCollector implements MessageCollectorInterface
     {
         $this->cacheFile = $cacheDirectory.'/smoker/smoker.messages';
         $this->fileSystem = new Filesystem();
+    }
+
+    public function initialize(): void
+    {
         $this->fileSystem->dumpFile($this->cacheFile, '');
     }
 
