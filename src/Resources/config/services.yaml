@@ -6,6 +6,7 @@ services:
             - '%kernel.cache_dir%'
             - '%jk_smoker.providers%'
             - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
+            - '@LAG\SmokerBundle\Message\MessageCollector'
         tags:
             - {name: console.command}
 
@@ -22,8 +23,8 @@ services:
     ########################
 
     ### Providers ###
-    LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider:
-        class: LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider
+    LAG\SmokerBundle\Bridge\Symfony\SymfonyRoutingProvider:
+        class: LAG\SmokerBundle\Bridge\Symfony\SymfonyRoutingProvider
         arguments:
             - '@router'
             - '@LAG\SmokerBundle\Requirements\Registry\RequirementsProviderRegistry'
