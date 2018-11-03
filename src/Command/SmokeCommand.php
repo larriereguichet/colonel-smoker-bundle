@@ -36,16 +36,6 @@ class SmokeCommand extends Command
     private $cacheFile;
 
     /**
-     * @var string
-     */
-    private $errorsFile;
-
-    /**
-     * @var string
-     */
-    private $successFile;
-
-    /**
      * @var \Twig_Environment
      */
     private $twig;
@@ -69,6 +59,11 @@ class SmokeCommand extends Command
      * @var MessageCollectorInterface
      */
     private $messageCollector;
+
+    /**
+     * @var Client
+     */
+    private $client;
 
     /**
      * SmokeCommand constructor.
@@ -128,14 +123,12 @@ class SmokeCommand extends Command
 
     private function initializeCache()
     {
-        $fileSystem = new Filesystem();
-
         $this->cacheFile = $this->cacheDir.'/smoker/smoker.cache';
-        $this->errorsFile = $this->cacheDir.'/smoker/smoker.error';
-        $this->successFile = $this->cacheDir.'/smoker/smoker.success';
+        $this->messageCollector->initialize();
 
-        $fileSystem->dumpFile($this->errorsFile, '');
-        $fileSystem->dumpFile($this->successFile, '');
+        // Create a new client. Cookies are by default enabled
+        $this->client = new Client();
+        $this->client->followRedirects(false);
     }
 
     /**
@@ -157,8 +150,7 @@ class SmokeCommand extends Command
 
             while (($row = fgets($handle, 4096)) !== false) {
                 $data = unserialize($row);
-                $url = $host.$data['location'];
-                $this->processRow($url, $stopOnFailure);
+                $this->processRow($host, $data['location'], $stopOnFailure);
 
                 if (Output::VERBOSITY_DEBUG === $this->io->getVerbosity()) {
                     $this->io->write('  '.Helper::formatMemory(memory_get_usage(true)));
@@ -176,45 +168,28 @@ class SmokeCommand extends Command
 
     private function generateResults()
     {
-        $this->errorsFile = $this->cacheDir.'/smoker/smoker.error';
-        $this->successFile = $this->cacheDir.'/smoker/smoker.success';
-
-        $raw = file_get_contents($this->successFile);
-        $successData = explode(PHP_EOL, $raw);
-        array_pop($successData);
-        $successData = array_map(function ($serializedData) {
-            return unserialize($serializedData);
-        }, $successData);
-
-        $raw = file_get_contents($this->errorsFile);
-        $errorData = explode(PHP_EOL, $raw);
-        array_pop($errorData);
-        $errorData = array_map(function ($serializedData) {
-            return unserialize($serializedData);
-        }, $errorData);
+        $messages = $this->messageCollector->read();
 
         $content = $this->twig->render('@LAGSmoker/Results/results.html.twig', [
-            'successData' => $successData,
-            'errorData' => $errorData,
+            'messages' => $messages,
         ]);
 
         $this->fileSystem->dumpFile($this->cacheDir.'/smoker/results.html', $content);
     }
 
     /**
+     * @param string $host
      * @param string $location
-     *
      * @param bool   $stopOnFailure
      *
      * @throws \Exception
      */
-    private function processRow(string $location, bool $stopOnFailure): void
+    private function processRow(string $host, string $location, bool $stopOnFailure): void
     {
-        $this->io->write('Processing '.$location.'...');
+        $this->io->write('Processing '.$host.$location.'...');
 
         // Create a new empty client and fetch the request data
-        $client = new Client();
-        $crawler = $client->request('get', $location);
+        $crawler = $client->request('get', $host.$location);
         $response = $client->getResponse();
 
         try {
@@ -223,41 +198,59 @@ class SmokeCommand extends Command
             $this
                 ->messageCollector
                 ->addError(
+                    $location,
                     'An error has occurred when matching the path "'.$location.'"',
                     500,
                     $exception
                 );
             $this->io->write('...[<comment>WARN</comment>]');
+            $this->messageCollector->flush();
 
             return;
         }
+        $responseHandled = false;
 
         foreach ($this->responseHandlerRegistry->all() as $responseHandlerName => $responseHandler) {
-            if ($responseHandler->supports($routeName)) {
+            if (!$responseHandler->supports($routeName)) {
                 continue;
             }
+            $responseHandled = true;
 
             try {
                 $responseHandler->handle($routeName, $crawler, $client);
-                $this->io->write('...[<info>OK</info>]');
-            } catch (\Exception $exception) {
-                $this->io->note('Error in the response handler "'.$responseHandlerName.'"');
 
+                $this->io->write('...[<info>OK</info>]');
+                $this
+                    ->messageCollector
+                    ->addSuccess($location, 'Success for handler', $response->getStatus())
+                ;
+            } catch (\Exception $exception) {
                 if (true === $stopOnFailure) {
                     throw $exception;
                 }
                 $this
                     ->messageCollector
                     ->addError(
-                        'An error has occurred when processing the url '.$location,
+                        $location,
+                        'An error has occurred when processing the url '.$host.$location,
                         $response->getStatus(),
                         $exception
                     )
                 ;
-                $this->io->write('...[<error>WARN</error>]');
+                $this->io->write('...[<error>KO</error>]');
+                $this->io->note('Error in the response handler "'.$responseHandlerName.'"');
                 $this->io->error($exception->getMessage());
             }
         }
+
+        if (!$responseHandled) {
+            $this->io->write('...[<comment>WARN</comment>]');
+            $this
+                ->messageCollector
+                ->addWarning($location, 'The response of the url is not handle by any response handler')
+            ;
+        }
+
         $this->messageCollector->flush();
     }
 
