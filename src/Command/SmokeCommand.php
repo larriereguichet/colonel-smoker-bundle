@@ -189,8 +189,8 @@ class SmokeCommand extends Command
         $this->io->write('Processing '.$host.$location.'...');
 
         // Create a new empty client and fetch the request data
-        $crawler = $client->request('get', $host.$location);
-        $response = $client->getResponse();
+        $crawler = $this->client->request('get', $host.$location);
+        $response = $this->client->getResponse();
 
         try {
             $routeName = $this->match($location);
@@ -217,7 +217,7 @@ class SmokeCommand extends Command
             $responseHandled = true;
 
             try {
-                $responseHandler->handle($routeName, $crawler, $client);
+                $responseHandler->handle($routeName, $crawler, $this->client);
 
                 $this->io->write('...[<info>OK</info>]');
                 $this
