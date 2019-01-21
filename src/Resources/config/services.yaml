@@ -4,7 +4,7 @@ services:
         class: LAG\SmokerBundle\Command\GenerateCacheCommand
         arguments:
             - '%kernel.cache_dir%'
-            - '%jk_smoker.providers%'
+            - '%lag_smoker.providers%'
             - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
             - '@LAG\SmokerBundle\Message\MessageCollector'
         tags:
@@ -32,7 +32,7 @@ services:
     LAG\SmokerBundle\Requirements\Provider\RequirementsProvider:
         class: LAG\SmokerBundle\Requirements\Provider\RequirementsProvider
         arguments:
-            - '%jk_smoker.mapping%'
+            - '%lag_smoker.mapping%'
             - '@router'
             - '@doctrine'
     #################

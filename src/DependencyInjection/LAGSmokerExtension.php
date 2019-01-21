@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class JKSmokerExtension extends Extension
+class LAGSmokerExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -20,7 +20,12 @@ class JKSmokerExtension extends Extension
         );
         $loader->load('services.yaml');
 
-        $container->setParameter('jk_smoker.mapping', $config['mapping']);
-        $container->setParameter('jk_smoker.providers', $config['providers']);
+        $container->setParameter('lag_smoker.mapping', $config['mapping']);
+        $container->setParameter('lag_smoker.providers', $config['providers']);
+    }
+
+    public function getAlias()
+    {
+        return 'lag_smoker';
     }
 }

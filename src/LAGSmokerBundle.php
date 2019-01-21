@@ -4,7 +4,7 @@ namespace LAG\SmokerBundle;
 
 use LAG\SmokerBundle\DependencyInjection\CompilerPass\ResponseHandlerCompilerPass;
 use LAG\SmokerBundle\DependencyInjection\CompilerPass\UrlProviderCompilerPass;
-use LAG\SmokerBundle\DependencyInjection\JKSmokerExtension;
+use LAG\SmokerBundle\DependencyInjection\LAGSmokerExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -12,7 +12,7 @@ class LAGSmokerBundle extends Bundle
 {
     public function getContainerExtension()
     {
-        return new JKSmokerExtension();
+        return new LAGSmokerExtension();
     }
 
     public function build(ContainerBuilder $container)
