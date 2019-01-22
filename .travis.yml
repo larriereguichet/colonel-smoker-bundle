@@ -14,6 +14,7 @@ install:
 
 script:
   - bin/phpunit --coverage-text --coverage-clover=coverage.clover
+  - bin/php-cs-fixer fix -v --diff --dry-run
 
 after_script:
   - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
