@@ -23,52 +23,58 @@ class SmokeCommand extends Command
     /**
      * @var string
      */
-    private $cacheDir;
+    protected $cacheDir;
 
     /**
      * @var ResponseHandlerRegistry
      */
-    private $responseHandlerRegistry;
+    protected $responseHandlerRegistry;
 
     /**
      * @var string
      */
-    private $cacheFile;
+    protected $cacheFile;
 
     /**
      * @var \Twig_Environment
      */
-    private $twig;
+    protected $twig;
 
     /**
      * @var Filesystem
      */
-    private $fileSystem;
+    protected $fileSystem;
 
     /**
      * @var SymfonyStyle
      */
-    private $io;
+    protected $io;
 
     /**
      * @var UrlProviderRegistry
      */
-    private $urlProviderRegistry;
+    protected $urlProviderRegistry;
 
     /**
      * @var MessageCollectorInterface
      */
-    private $messageCollector;
+    protected $messageCollector;
 
     /**
      * @var Client
      */
-    private $client;
+    protected $client;
+
+    /**
+     * @var string
+     */
+    protected $host;
 
     /**
      * SmokeCommand constructor.
      *
      * @param string                    $cacheDir
+     * @param string                    $host
      * @param ResponseHandlerRegistry   $responseHandlerRegistry
      * @param UrlProviderRegistry       $urlProviderRegistry
      * @param MessageCollectorInterface $messageCollector
@@ -76,12 +82,12 @@ class SmokeCommand extends Command
      */
     public function __construct(
         string $cacheDir,
+        string $host,
         ResponseHandlerRegistry $responseHandlerRegistry,
         UrlProviderRegistry $urlProviderRegistry,
         MessageCollectorInterface $messageCollector,
         \Twig_Environment $twig
-    )
-    {
+    ) {
         parent::__construct();
 
         $this->cacheDir = $cacheDir;
@@ -90,18 +96,14 @@ class SmokeCommand extends Command
         $this->fileSystem = new Filesystem();
         $this->urlProviderRegistry = $urlProviderRegistry;
         $this->messageCollector = $messageCollector;
+        $this->host = $host;
     }
 
     protected function configure()
     {
         $this
-            ->addOption(
-                'stop-on-failure',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Stop all tests if an error is detected',
-                false
-            )
+            ->addOption('stop-on-failure', null, InputOption::VALUE_NONE, 'Stop all tests if an error is detected')
+            ->addOption('host', null, InputOption::VALUE_REQUIRED, 'The host called by smoker')
         ;
     }
 
@@ -110,22 +112,19 @@ class SmokeCommand extends Command
         $this->io = new SymfonyStyle($input, $output);
         $this->io->title('Smoker Tests');
 
-        $this->io->note('Initialize results cache...');
-        $this->initializeCache();
+        $this->initializeCommand();
+        $host = $this->host;
 
-        $host = 'http://127.0.0.1:8000/index.php';
-
-        $success = $this->smoke($host, (bool)$input->getOption('stop-on-failure'));
-
-        $this->io->note('Generating results report...');
+        if ($input->getOption('host')) {
+            $host = $input->getOption('host');
+        }
+        $this->smoke($host, $input->getOption('stop-on-failure'));
         $this->generateResults();
-        $this->io->text('The results report has been generated here file://'.$this->cacheDir.'/smoker/results.html');
-
-        return $success;
     }
 
-    private function initializeCache(): void
+    protected function initializeCommand()
     {
+        $this->io->note('Initialize results cache...');
         $this->cacheFile = $this->cacheDir.'/smoker/smoker.cache';
         $this->messageCollector->initialize();
 
@@ -137,55 +136,49 @@ class SmokeCommand extends Command
     /**
      * @param string $host
      * @param bool   $stopOnFailure
-     *
-     * @return bool
      */
-    private function smoke(string $host, bool $stopOnFailure): bool
+    protected function smoke(string $host, bool $stopOnFailure)
     {
         if (!$this->fileSystem->exists($this->cacheFile)) {
             $this->io->warning('The cache file is not generated. Nothing will be done.');
             $this->io->note('The cache can be generated with the command bin/console smoker:generate-cache');
 
-            return false;
+            return;
         }
-        $handle = fopen($this->cacheFile, "r");
-        $allResponseInSuccess = true;
+        $handle = fopen($this->cacheFile, 'r');
 
         if ($handle) {
             $this->io->text('Start reading urls in cache...');
 
-            while (($row = fgets($handle, 4096)) !== false) {
+            while (false !== ($row = fgets($handle, 4096))) {
                 $data = unserialize($row);
-                $success = $this->processRow($host, $data['location'], $stopOnFailure);
+                $this->processRow($host, $data['location'], $stopOnFailure);
 
                 if (Output::VERBOSITY_DEBUG === $this->io->getVerbosity()) {
                     $this->io->write('  '.Helper::formatMemory(memory_get_usage(true)));
-                }
-                if (!$success) {
-                    $allResponseInSuccess = false;
                 }
                 $this->io->newLine();
                 gc_collect_cycles();
             }
 
             if (!feof($handle)) {
-                echo "Erreur: fgets() a échoué\n";
+                $this->io->error('An error has occurred when reading the cache');
             }
             fclose($handle);
         }
-
-        return $allResponseInSuccess;
     }
 
-    private function generateResults(): void
+    protected function generateResults()
     {
+        $this->io->note('Generating results report...');
+        $this->messageCollector->flush();
         $messages = $this->messageCollector->read();
 
         $content = $this->twig->render('@LAGSmoker/Results/results.html.twig', [
             'messages' => $messages,
         ]);
-
         $this->fileSystem->dumpFile($this->cacheDir.'/smoker/results.html', $content);
+        $this->io->text('The results report has been generated here file://'.$this->cacheDir.'/smoker/results.html');
     }
 
     /**
@@ -193,11 +186,9 @@ class SmokeCommand extends Command
      * @param string $location
      * @param bool   $stopOnFailure
      *
-     * @return bool
-     *
      * @throws \Exception
      */
-    private function processRow(string $host, string $location, bool $stopOnFailure): bool
+    protected function processRow(string $host, string $location, bool $stopOnFailure): void
     {
         $this->io->write('Processing '.$host.$location.'...');
 
@@ -219,10 +210,9 @@ class SmokeCommand extends Command
             $this->io->write('...[<comment>WARN</comment>]');
             $this->messageCollector->flush();
 
-            return false;
+            return;
         }
         $responseHandled = false;
-        $responseInError = true;
 
         foreach ($this->responseHandlerRegistry->all() as $responseHandlerName => $responseHandler) {
             if (!$responseHandler->supports($routeName)) {
@@ -239,22 +229,21 @@ class SmokeCommand extends Command
                     ->addSuccess($location, 'Success for handler', $response->getStatus())
                 ;
             } catch (\Exception $exception) {
-                if (true === $stopOnFailure) {
-                    throw $exception;
-                }
+                $url = $host.$location;
+                $message = sprintf(
+                    'An error has occurred when processing the url %s',
+                    $url
+                );
                 $this
                     ->messageCollector
-                    ->addError(
-                        $location,
-                        'An error has occurred when processing the url '.$host.$location,
-                        $response->getStatus(),
-                        $exception
-                    )
+                    ->addError($location, $message, $response->getStatus(), $exception)
                 ;
+                if (true === $stopOnFailure) {
+                    $this->generateResults();
+
+                    throw $exception;
+                }
                 $this->io->write('...[<error>KO</error>]');
-                $this->io->note('Error in the response handler "'.$responseHandlerName.'"');
-                $this->io->error($exception->getMessage());
-                $responseInError = true;
             }
         }
 
@@ -265,9 +254,8 @@ class SmokeCommand extends Command
                 ->addWarning($location, 'The response of the url is not handle by any response handler')
             ;
         }
-        $this->messageCollector->flush();
 
-        return !$responseInError;
+        $this->messageCollector->flush();
     }
 
     /**
@@ -279,7 +267,7 @@ class SmokeCommand extends Command
      *
      * @throws Exception
      */
-    private function match(string $path): string
+    protected function match(string $path): string
     {
         foreach ($this->urlProviderRegistry->all() as $provider) {
             if (!$provider->supports($path)) {

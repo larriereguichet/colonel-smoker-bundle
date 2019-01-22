@@ -1,9 +1,9 @@
 <?php
 
-namespace LAG\SmokerBundle\Requirements\Registry;
+namespace LAG\SmokerBundle\Url\Requirements\Registry;
 
 use LAG\SmokerBundle\Exception\Exception;
-use LAG\SmokerBundle\Requirements\Provider\RequirementsProviderInterface;
+use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 
 class RequirementsProviderRegistry
 {

@@ -35,12 +35,14 @@ class Url implements \Serializable
     }
 
     /**
-     * Constructs the object
-     * @link https://php.net/manual/en/serializable.unserialize.php
+     * Constructs the object.
+     *
+     * @see https://php.net/manual/en/serializable.unserialize.php
+     *
      * @param string $serialized <p>
-     * The string representation of the object.
-     * </p>
-     * @return void
+     *                           The string representation of the object.
+     *                           </p>
+     *
      * @since 5.1.0
      */
     public function unserialize($serialized)
@@ -49,5 +51,21 @@ class Url implements \Serializable
 
         $this->location = $data['location'];
         $this->providerName = $data['providerName'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocation(): string
+    {
+        return $this->location;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProviderName(): string
+    {
+        return $this->providerName;
     }
 }

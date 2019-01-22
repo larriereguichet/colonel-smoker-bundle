@@ -3,7 +3,6 @@
 namespace LAG\SmokerBundle\Command;
 
 use LAG\SmokerBundle\Message\MessageCollectorInterface;
-use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,7 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class GenerateCacheCommand extends Command
 {
     protected static $defaultName = 'smoker:generate-cache';
-    
+
     /**
      * @var UrlProviderRegistry
      */
@@ -29,7 +28,7 @@ class GenerateCacheCommand extends Command
     /**
      * @var array
      */
-    protected $providerConfiguration;
+    protected $routesConfiguration;
 
     /**
      * @var Filesystem
@@ -42,24 +41,30 @@ class GenerateCacheCommand extends Command
     protected $messageCollector;
 
     /**
+     * @var SymfonyStyle
+     */
+    protected $io;
+
+    /**
      * GenerateCacheCommand constructor.
      *
      * @param string                    $cacheDir
-     * @param array                     $providerConfiguration
+     * @param array                     $routesConfiguration
      * @param UrlProviderRegistry       $registry
      * @param MessageCollectorInterface $messageCollector
      */
     public function __construct(
         string $cacheDir,
-        array $providerConfiguration,
+        array $routesConfiguration,
         UrlProviderRegistry $registry,
         MessageCollectorInterface $messageCollector
     ) {
         $this->registry = $registry;
         $this->cacheDir = $cacheDir;
-        $this->providerConfiguration = $providerConfiguration;
+        $this->routesConfiguration = $routesConfiguration;
 
         parent::__construct();
+
         $this->messageCollector = $messageCollector;
     }
 
@@ -70,75 +75,50 @@ class GenerateCacheCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->fileSystem = new Filesystem();
         $this->messageCollector->initialize();
-        $io = new SymfonyStyle($input, $output);
-        $io->title('Smoker Generate Cache Command');
+        $this->io = new SymfonyStyle($input, $output);
+    }
 
-        // Initialize the cache file
-        $io->text('Creating cache file...');
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->io->title('Smoker Generate Cache Command');
+
+        // Create an empty cache file to initialize urls collecting
         $cacheFile = $this->createCacheFile();
-
-        // Gather and configure the urls providers
-        $io->text('Fetching urls providers...');
-        $providers = $this->getProviders();
         $urlCount = 0;
 
-        foreach ($providers as $providerName => $providerData) {
-            $io->text('Processing the url provider "'.$providerName.'"...');
-            $provider = $providerData['provider'];
-            $options = $providerData['options'];
+        foreach ($this->registry->all() as $provider) {
+            $this->io->text('Processing the url provider "'.$provider->getName().'"...');
+            $resolver = new OptionsResolver();
+            $provider->configure($resolver);
+            $options = $resolver->resolve();
+
             $urls = $provider->getCollection($options);
 
-            $io->progressStart($urls->count());
+            $this->io->progressStart($urls->count());
 
             foreach ($urls->all() as $urlItem) {
                 $providerCache = $urlItem->serialize()."\n";
                 $this->fileSystem->appendToFile($cacheFile, $providerCache);
-                $io->progressAdvance();
-                $urlCount++;
+                $this->io->progressAdvance();
+                ++$urlCount;
             }
-            $io->progressFinish();
+            $this->io->progressFinish();
         }
 
         if ($urlCount > 0) {
-            $io->success('The cache has been generated with '.$urlCount.' urls in '.$cacheFile);
+            $this->io->success('The cache has been generated with '.$urlCount.' urls in '.$cacheFile);
         } else {
-            $io->warning('No url was found in the configured url providers');
+            $this->io->warning('No url was found in the configured url providers');
         }
-    }
-
-    /**
-     * @return UrlProviderInterface[][]
-     */
-    protected function getProviders(): array
-    {
-        $providers = $this->registry->all();
-        $allowedProviders = [];
-        $resolver = new OptionsResolver();
-
-        foreach ($providers as $id => $provider) {
-            $resolver->clear();
-
-            if (key_exists($id, $this->providerConfiguration)) {
-                if (null === $this->providerConfiguration[$id]) {
-                    $this->providerConfiguration[$id] = [];
-                }
-                $provider->configureOptions($resolver);
-                $options = $resolver->resolve($this->providerConfiguration[$id]);
-
-                $allowedProviders[$id]['provider'] = $provider;
-                $allowedProviders[$id]['options'] = $options;
-            }
-        }
-
-        return $allowedProviders;
     }
 
     protected function createCacheFile(): string
     {
+        $this->io->text('Creating cache file...');
         $cacheFile = $this->cacheDir.'/smoker/smoker.cache';
         $this->fileSystem->dumpFile($cacheFile, '');
 

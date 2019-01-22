@@ -10,12 +10,24 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $root = $treeBuilder->root('jk_smoke');
+        $root = $treeBuilder->root('lag_smoke');
 
         $root
             ->children()
-                ->arrayNode('providers')
-                    ->variablePrototype()
+                ->scalarNode('host')
+                    ->defaultValue('http://127.0.0.1:8000')
+                ->end()
+                ->arrayNode('routes')
+                    ->arrayPrototype()
+                        ->children()
+                            ->scalarNode('mapping')->end()
+                            ->arrayNode('handlers')
+                                ->defaultValue([
+                                    'status_code' => '200',
+                                ])
+                                ->scalarPrototype()->end()
+                            ->end()
+                        ->end()
                     ->end()
                 ->end()
                 ->arrayNode('mapping')
@@ -24,10 +36,11 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('entity')->end()
                             ->scalarNode('pattern')->end()
                             ->scalarNode('route')->end()
-                            ->arrayNode('excludes')
+                            ->scalarNode('provider')->defaultValue('default')->end()
+                            ->arrayNode('requirements')
                                 ->scalarPrototype()->end()
                             ->end()
-                            ->arrayNode('requirements')
+                            ->arrayNode('excludes')
                                 ->scalarPrototype()->end()
                             ->end()
                         ->end()

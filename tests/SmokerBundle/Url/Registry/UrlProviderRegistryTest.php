@@ -1,13 +1,13 @@
 <?php
 
-namespace LAG\SmokerBundle\Tests\Url\Provider;
+namespace LAG\SmokerBundle\Tests\Url\Registry;
 
 use LAG\SmokerBundle\Exception\Exception;
+use LAG\SmokerBundle\Tests\BaseTestCase;
 use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
-use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 
-class UrlProviderRegistryTest extends TestCase
+class UrlProviderRegistryTest extends BaseTestCase
 {
     public function testAdd()
     {

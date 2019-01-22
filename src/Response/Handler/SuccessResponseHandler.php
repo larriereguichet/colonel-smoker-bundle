@@ -10,15 +10,38 @@ use Symfony\Component\HttpFoundation\Response;
 class SuccessResponseHandler implements ResponseHandlerInterface
 {
     /**
-     * @inheritdoc
+     * @var array
      */
-    public function supports(string $routeName): bool
+    private $routes;
+
+    /**
+     * SuccessResponseHandler constructor.
+     *
+     * @param array $routes
+     */
+    public function __construct(array $routes = [])
     {
-        return true;
+        $this->routes = $routes;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     */
+    public function supports(string $routeName): bool
+    {
+        if (!key_exists($routeName, $this->routes)) {
+            return false;
+        }
+
+        if (!key_exists('handlers', $this->routes[$routeName])) {
+            return false;
+        }
+
+        return key_exists('status_code', $this->routes[$routeName]['handlers']);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function handle(string $routeName, Crawler $crawler, Client $client): void
     {

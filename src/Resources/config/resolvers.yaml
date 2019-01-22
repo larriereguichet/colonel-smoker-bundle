@@ -1,0 +1,7 @@
+services:
+    LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver:
+        class: LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver
+        arguments:
+            - '%lag_smoker.mapping%'
+
+    LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface: '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'

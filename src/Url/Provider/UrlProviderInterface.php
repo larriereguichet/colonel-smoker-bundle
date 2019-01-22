@@ -27,7 +27,7 @@ interface UrlProviderInterface
      */
     public function supports(string $path): bool;
 
-    public function configureOptions(OptionsResolver $resolver): void;
+    public function configure(OptionsResolver $resolver): void;
 
     /**
      * Return the provider name.

@@ -1,0 +1,5 @@
+services:
+    LAG\SmokerBundle\Message\MessageCollector:
+        class: LAG\SmokerBundle\Message\MessageCollector
+        arguments:
+            - '%kernel.cache_dir%'
