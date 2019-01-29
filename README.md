@@ -1,6 +1,6 @@
 # Colonel Smoker Bundle
 
-![logo](https://vignette.wikia.nocookie.net/onepiece/images/1/1c/Smoker_Anime_Pre_Timeskip_Infobox.png/revision/latest?cb=20160102184944 | width=50)
+![logo](https://vignette.wikia.nocookie.net/onepiece/images/1/1c/Smoker_Anime_Pre_Timeskip_Infobox.png/revision/latest/scale-to-width-down/150)
 
 The Colonel Smoker is an expert in smoke. He can say if your application is smoking before deploying it in production.
 
