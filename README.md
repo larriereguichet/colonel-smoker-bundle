@@ -16,7 +16,7 @@ composer require --dev lag/colonel-smoker-bundle:dev-master
 
 ## Usage
 
-1. Fist generate the URL cache :
+1. First generate the URL cache :
 ```bash
 bin/console smoker:generate-cache
 ```
