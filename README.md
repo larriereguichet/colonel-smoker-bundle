@@ -2,13 +2,11 @@
 
 ![logo](https://vignette.wikia.nocookie.net/onepiece/images/1/1c/Smoker_Anime_Pre_Timeskip_Infobox.png/revision/latest/scale-to-width-down/150)
 
-The Colonel Smoker is an expert in smoke. He can say if your application is smoking before deploying it in production.
+The **Colonel Smoker** is an expert in smoke. He can even tell if your application is smoking before deploying it to production.
 
-The Colonel Smoker bundle will search into the urls of your Symfony application (only Symfony is supported now), call 
-them and check if no 500 errors are encountered. It also provides a easy way to provide requirements parameters for your 
-dynamic urls.
-
-By default, the bundle used the routes declared in the Symfony routing.
+The **Colonel Smoker** find the URLs of your Symfony application (only Symfony is supported now) and looks for `500` errors. 
+- helps providing requirements parameters for your dynamic URLs
+- uses the routes declared in the Symfony routing by default
 
 ## Installation
 
@@ -18,39 +16,39 @@ composer require --dev lag/colonel-smoker-bundle:dev-master
 
 ## Usage
 
-Fist generate the url cache :
+1. First generate the URL cache :
 ```bash
 bin/console smoker:generate-cache
 ```
 
-Then run the smoke tests :
+2. Then run the smoke tests :
 ```bash
 bin/console smoker:smoke
 ```
 
 
-## Urls Providers
-You can easily add a requirement provider, by adding a service implements the UrlRequirementsInterface.
+## URLs Providers
+You can easily add a requirement provider, by adding a service that implements the `UrlProviderInterface`.
 
 ```php
 
-class MyRequirementProvider implements UrlRequirementsInterface
+class MyUrlProvider implements UrlProviderInterface
 {
     
 }
 
 ```
 
-## Urls Requirements Providers
+## URLs Requirements Providers
 
-The urls requirements providers are used to provide parameters to route with dynamic parameters 
+The URLs requirements providers are used to provide parameters to routes with dynamic parameters 
 (for example `/article/edit/{id}`). 
 
-You can easily add a requirement provider, by adding a service implements the UrlRequirementsInterface.
+You can easily add a requirement provider, by adding a service that implements the `RequirementsProviderInterface`.
 
 ```php
 
-class MyRequirementProvider implements UrlRequirementsInterface
+class MyRequirementsProvider implements RequirementsProviderInterface
 {
     
 }
