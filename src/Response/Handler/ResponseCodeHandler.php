@@ -7,15 +7,17 @@ use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 
-class SuccessResponseHandler implements ResponseHandlerInterface
+class ResponseCodeHandler implements ResponseHandlerInterface
 {
+    private $name = 'response_code';
+
     /**
      * @var array
      */
     private $routes;
 
     /**
-     * SuccessResponseHandler constructor.
+     * ResponseCodeHandler constructor.
      *
      * @param array $routes
      */
@@ -37,21 +39,35 @@ class SuccessResponseHandler implements ResponseHandlerInterface
             return false;
         }
 
-        return key_exists('status_code', $this->routes[$routeName]['handlers']);
+        return key_exists($this->name, $this->routes[$routeName]['handlers']);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handle(string $routeName, Crawler $crawler, Client $client): void
+    public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void
     {
+        $expectedResponseCode = Response::HTTP_OK;
+
+        if (1 <= count($options)) {
+            $expectedResponseCode = $options[0];
+        }
+
         if (null === $client->getResponse()) {
             throw new Exception('The client has no response. It should make a request before handle a response');
         }
         $responseCode = $client->getResponse()->getStatus();
 
-        if (Response::HTTP_OK !== $client->getResponse()->getStatus()) {
-            throw new Exception('Excepted code 200, got '.$responseCode.' for route '.$routeName);
+        if ((string) $expectedResponseCode !== (string) $responseCode) {
+            throw new Exception('Excepted code '.$expectedResponseCode.', got '.$responseCode.' for route '.$routeName);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

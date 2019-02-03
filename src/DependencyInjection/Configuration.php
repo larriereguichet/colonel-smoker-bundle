@@ -23,7 +23,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('mapping')->end()
                             ->arrayNode('handlers')
                                 ->defaultValue([
-                                    'status_code' => '200',
+                                    'response_code' => '200',
                                 ])
                                 ->scalarPrototype()->end()
                             ->end()

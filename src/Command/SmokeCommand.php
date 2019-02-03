@@ -7,6 +7,7 @@ use LAG\SmokerBundle\Message\MessageCollectorInterface;
 use LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry;
 use Goutte\Client;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
+use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Filesystem\Filesystem;
 
 class SmokeCommand extends Command
@@ -71,10 +73,21 @@ class SmokeCommand extends Command
     protected $host;
 
     /**
+     * @var bool
+     */
+    protected $stopOnFailure = false;
+
+    /**
+     * @var array
+     */
+    protected $routes;
+
+    /**
      * SmokeCommand constructor.
      *
      * @param string                    $cacheDir
      * @param string                    $host
+     * @param array                     $routes
      * @param ResponseHandlerRegistry   $responseHandlerRegistry
      * @param UrlProviderRegistry       $urlProviderRegistry
      * @param MessageCollectorInterface $messageCollector
@@ -83,6 +96,7 @@ class SmokeCommand extends Command
     public function __construct(
         string $cacheDir,
         string $host,
+        array $routes,
         ResponseHandlerRegistry $responseHandlerRegistry,
         UrlProviderRegistry $urlProviderRegistry,
         MessageCollectorInterface $messageCollector,
@@ -97,6 +111,7 @@ class SmokeCommand extends Command
         $this->urlProviderRegistry = $urlProviderRegistry;
         $this->messageCollector = $messageCollector;
         $this->host = $host;
+        $this->routes = $routes;
     }
 
     protected function configure()
@@ -112,21 +127,24 @@ class SmokeCommand extends Command
         $this->io = new SymfonyStyle($input, $output);
         $this->io->title('Smoker Tests');
 
-        $this->initializeCommand();
-        $host = $this->host;
-
-        if ($input->getOption('host')) {
-            $host = $input->getOption('host');
-        }
-        $this->smoke($host, $input->getOption('stop-on-failure'));
+        $this->initializeCommand($input);
+        $this->smoke($this->host, $this->stopOnFailure);
         $this->generateResults();
     }
 
-    protected function initializeCommand()
+    protected function initializeCommand(InputInterface $input)
     {
         $this->io->note('Initialize results cache...');
         $this->cacheFile = $this->cacheDir.'/smoker/smoker.cache';
         $this->messageCollector->initialize();
+
+        if ($input->getOption('host')) {
+            $this->host = $input->getOption('host');
+        }
+
+        if ($input->getOption('stop-on-failure')) {
+            $this->stopOnFailure = true;
+        }
 
         // Create a new client. Cookies are by default enabled
         $this->client = new Client();
@@ -152,7 +170,7 @@ class SmokeCommand extends Command
 
             while (false !== ($row = fgets($handle, 4096))) {
                 $data = unserialize($row);
-                $this->processRow($host, $data['location'], $stopOnFailure);
+                $this->processRow($host, $data['location']);
 
                 if (Output::VERBOSITY_DEBUG === $this->io->getVerbosity()) {
                     $this->io->write('  '.Helper::formatMemory(memory_get_usage(true)));
@@ -184,16 +202,16 @@ class SmokeCommand extends Command
     /**
      * @param string $host
      * @param string $location
-     * @param bool   $stopOnFailure
      *
      * @throws \Exception
      */
-    protected function processRow(string $host, string $location, bool $stopOnFailure): void
+    protected function processRow(string $host, string $location): void
     {
         $this->io->write('Processing '.$host.$location.'...');
 
         // Create a new empty client and fetch the request data
         $crawler = $this->client->request('get', $host.$location);
+        /** @var Response $response */
         $response = $this->client->getResponse();
 
         try {
@@ -212,40 +230,7 @@ class SmokeCommand extends Command
 
             return;
         }
-        $responseHandled = false;
-
-        foreach ($this->responseHandlerRegistry->all() as $responseHandlerName => $responseHandler) {
-            if (!$responseHandler->supports($routeName)) {
-                continue;
-            }
-            $responseHandled = true;
-
-            try {
-                $responseHandler->handle($routeName, $crawler, $this->client);
-
-                $this->io->write('...[<info>OK</info>]');
-                $this
-                    ->messageCollector
-                    ->addSuccess($location, 'Success for handler', $response->getStatus())
-                ;
-            } catch (\Exception $exception) {
-                $url = $host.$location;
-                $message = sprintf(
-                    'An error has occurred when processing the url %s',
-                    $url
-                );
-                $this
-                    ->messageCollector
-                    ->addError($location, $message, $response->getStatus(), $exception)
-                ;
-                if (true === $stopOnFailure) {
-                    $this->generateResults();
-
-                    throw $exception;
-                }
-                $this->io->write('...[<error>KO</error>]');
-            }
-        }
+        $responseHandled = $this->handleResponse($routeName, $location, $crawler, $response);
 
         if (!$responseHandled) {
             $this->io->write('...[<comment>WARN</comment>]');
@@ -278,5 +263,57 @@ class SmokeCommand extends Command
         }
 
         throw new Exception('The path "'.$path.'" is not supported by an url provider');
+    }
+
+    protected function handleResponse(string $routeName, string $location, Crawler $crawler, Response $response): bool
+    {
+        $responseHandled = false;
+
+        foreach ($this->responseHandlerRegistry->all() as $responseHandler) {
+            if (!$responseHandler->supports($routeName)) {
+                continue;
+            }
+            $responseHandled = true;
+
+            try {
+                $routeOptions = $this->routes[$routeName];
+                $providerOptions = [];
+
+                if (key_exists($responseHandler->getName(), $routeOptions['handlers'])) {
+                    $providerOptions = $routeOptions['handlers'][$responseHandler->getName()];
+
+                    if (!is_array($providerOptions)) {
+                        $providerOptions = [
+                            $providerOptions,
+                        ];
+                    }
+                }
+                $responseHandler->handle($routeName, $crawler, $this->client, $providerOptions);
+
+                $this->io->write('...[<info>OK</info>]');
+                $this
+                    ->messageCollector
+                    ->addSuccess($location, 'Success for handler', $response->getStatus())
+                ;
+            } catch (\Exception $exception) {
+                $url = $this->host.$location;
+                $message = sprintf(
+                    'An error has occurred when processing the url %s',
+                    $url
+                );
+                $this
+                    ->messageCollector
+                    ->addError($location, $message, $response->getStatus(), $exception)
+                ;
+                if (true === $this->stopOnFailure) {
+                    $this->generateResults();
+
+                    throw $exception;
+                }
+                $this->io->write('...[<error>KO</error>]');
+            }
+        }
+
+        return $responseHandled;
     }
 }

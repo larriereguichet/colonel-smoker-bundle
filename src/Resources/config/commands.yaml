@@ -14,6 +14,7 @@ services:
         arguments:
             - '%kernel.cache_dir%'
             - '%lag_smoker.host%'
+            - '%lag_smoker.routes%'
             - '@LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry'
             - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
             - '@LAG\SmokerBundle\Message\MessageCollector'
