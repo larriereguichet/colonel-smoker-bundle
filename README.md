@@ -20,6 +20,7 @@ composer require --dev lag/colonel-smoker-bundle:dev-master
 ```yaml
 # config/packages/dev/lag_smoker.yaml
 lag_smoker:
+    host: 'http://127.0.0.1:8000/' # This is the default configuration
     # This route will be used to generated urls to test against
     routes:
         # The homepage route has no parameters and expect a 200 OK response code
@@ -48,6 +49,8 @@ bin/console smoker:generate-cache
 ```bash
 bin/console smoker:smoke
 ```
+
+> If you use the Symfony WebServer bundle, dont forget to run `bin/console server:start`.
 
 ## Reference Configuration
 ```yaml
@@ -243,5 +246,4 @@ class MyResponseHandler implements LAG\SmokerBundle\Response\Handler\ResponseHan
 ]
 ```
 
-The **Colonel** relies on the Symfony [DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html)
-component and the [Goutte](https://github.com/FriendsOfPHP/Goutte) client.
+> The **Colonel** relies on the Symfony [DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html) component and the [Goutte](https://github.com/FriendsOfPHP/Goutte) client.
