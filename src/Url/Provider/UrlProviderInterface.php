@@ -7,6 +7,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 interface UrlProviderInterface
 {
+    /**
+     * Return a collection of urls. Options can be passed to the provider.
+     *
+     * @param array $options
+     *
+     * @return UrlCollection
+     */
     public function getCollection(array $options = []): UrlCollection;
 
     /**
@@ -27,6 +34,11 @@ interface UrlProviderInterface
      */
     public function supports(string $path): bool;
 
+    /**
+     * Configure options to be passed to the getCollection() method.
+     *
+     * @param OptionsResolver $resolver
+     */
     public function configure(OptionsResolver $resolver): void;
 
     /**
