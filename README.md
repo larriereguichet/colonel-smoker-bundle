@@ -2,6 +2,8 @@
 [![Build Status](https://travis-ci.org/larriereguichet/colonel-smoker-bundle.svg?branch=master)](https://travis-ci.org/larriereguichet/colonel-smoker-bundle)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/larriereguichet/colonel-smoker-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/larriereguichet/colonel-smoker-bundle/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/larriereguichet/colonel-smoker-bundle/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/larriereguichet/colonel-smoker-bundle/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/lag/colonel-smoker-bundle/v/stable)](https://packagist.org/packages/lag/colonel-smoker-bundle)
+[![License](https://poser.pugx.org/lag/colonel-smoker-bundle/license)](https://packagist.org/packages/lag/colonel-smoker-bundle)
 
 ![logo](https://vignette.wikia.nocookie.net/onepiece/images/1/1c/Smoker_Anime_Pre_Timeskip_Infobox.png/revision/latest/scale-to-width-down/150)
 
