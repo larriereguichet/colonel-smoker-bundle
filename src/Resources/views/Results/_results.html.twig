@@ -1,0 +1,36 @@
+<h3 class="bg-{{ type }}">{{ type | capitalize }} tests ({{ data | length }})</h3>
+
+<a href="#"
+   class="show-link"
+   data-target="#{{ type }}-table">
+    Show
+</a>
+
+<table id="{{ type }}-table"
+       class="table table-sm table-striped table-hover"
+       style="display: none">
+    <thead>
+    <tr>
+        <th>Url</th>
+        <th>Status</th>
+        <th>Message</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for message in data %}
+        <tr>
+            <td>
+                {{ message.url }}
+            </td>
+            <td>
+                {{ message.code }}
+            </td>
+            <td>
+                {{ message.message }}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<br><br>

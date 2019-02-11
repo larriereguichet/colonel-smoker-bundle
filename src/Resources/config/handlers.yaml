@@ -1,0 +1,5 @@
+services:
+    LAG\SmokerBundle\Response\Handler\ResponseCodeHandler:
+        class: LAG\SmokerBundle\Response\Handler\ResponseCodeHandler
+        arguments:
+            - '%lag_smoker.routes%'

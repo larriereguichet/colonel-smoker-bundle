@@ -1,0 +1,23 @@
+services:
+    LAG\SmokerBundle\Command\GenerateCacheCommand:
+        class: LAG\SmokerBundle\Command\GenerateCacheCommand
+        arguments:
+            - '%kernel.cache_dir%'
+            - '%lag_smoker.routes%'
+            - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
+            - '@LAG\SmokerBundle\Message\MessageCollector'
+        tags:
+            - {name: console.command}
+
+    LAG\SmokerBundle\Command\SmokeCommand:
+        class: LAG\SmokerBundle\Command\SmokeCommand
+        arguments:
+            - '%kernel.cache_dir%'
+            - '%lag_smoker.host%'
+            - '%lag_smoker.routes%'
+            - '@LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry'
+            - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
+            - '@LAG\SmokerBundle\Message\MessageCollector'
+            - '@twig'
+        tags:
+            - {name: console.command}

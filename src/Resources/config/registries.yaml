@@ -1,0 +1,11 @@
+services:
+    LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry:
+        class: LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry
+        calls:
+            - ['add', ['default', '@LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProvider']]
+
+    LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry:
+        class: LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry
+
+    LAG\SmokerBundle\Url\Registry\UrlProviderRegistry:
+        class: LAG\SmokerBundle\Url\Registry\UrlProviderRegistry

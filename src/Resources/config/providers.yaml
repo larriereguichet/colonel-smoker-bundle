@@ -1,0 +1,19 @@
+services:
+    LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider:
+        class: LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider
+        arguments:
+            - '%lag_smoker.routes%'
+            - '%lag_smoker.mapping%'
+            - '@router'
+            - '@LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry'
+
+    LAG\SmokerBundle\Url\Provider\UrlProviderInterface: '@LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider'
+
+    LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProvider:
+        class: LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProvider
+        arguments:
+            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface'
+            - '@router'
+            - '@doctrine.orm.entity_manager'
+
+    LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProvider'

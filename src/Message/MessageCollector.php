@@ -65,7 +65,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function flush(): void
     {
@@ -86,7 +86,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addError(string $url, string $message, int $code = 500, \Exception $exception = null): void
     {
@@ -103,7 +103,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addSuccess(string $url, string $message, int $code = 200): void
     {
@@ -115,7 +115,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function addWarning(string $url, string $message, int $code = 200): void
     {
@@ -127,7 +127,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getErrors(): array
     {
@@ -135,7 +135,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getSuccess(): array
     {
@@ -143,7 +143,7 @@ class MessageCollector implements MessageCollectorInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getWarnings(): array
     {
