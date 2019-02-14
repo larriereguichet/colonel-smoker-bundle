@@ -48,9 +48,12 @@ class ResponseCodeHandler implements ResponseHandlerInterface
     public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void
     {
         $expectedResponseCode = Response::HTTP_OK;
+        $configuration = $this->routes[$routeName]['handlers'][$this->name];
 
-        if (1 <= count($options)) {
-            $expectedResponseCode = $options[0];
+        if (!is_array($configuration)) {
+            $expectedResponseCode = $configuration;
+        } elseif (key_exists('code', $configuration)) {
+            $expectedResponseCode = $configuration['code'];
         }
 
         if (null === $client->getResponse()) {
