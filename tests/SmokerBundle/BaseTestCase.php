@@ -55,7 +55,7 @@ class BaseTestCase extends TestCase
             }
         }
 
-        $this->assertTrue(false);
+        $this->assertTrue(false, 'The service for the class "'.$serviceClass.'" does not exists or is not configured');
     }
 
     /**
