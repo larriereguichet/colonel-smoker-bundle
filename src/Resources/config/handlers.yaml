@@ -3,3 +3,5 @@ services:
         class: LAG\SmokerBundle\Response\Handler\ResponseCodeHandler
         arguments:
             - '%lag_smoker.routes%'
+
+    LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface: '@LAG\SmokerBundle\Response\Handler\ResponseCodeHandler'
