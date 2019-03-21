@@ -18,7 +18,7 @@ The **Colonel Smoker** find the URLs of your Symfony application (only Symfony i
 ## Installation
 
 ```bash
-composer require --dev lag/colonel-smoker-bundle:dev-master
+composer require --dev lag/colonel-smoker-bundle
 ```
 
 ## Configuration
