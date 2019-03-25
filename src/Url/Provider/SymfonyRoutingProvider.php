@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\NoConfigurationException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
 class SymfonyRoutingProvider implements UrlProviderInterface
@@ -119,11 +120,13 @@ class SymfonyRoutingProvider implements UrlProviderInterface
                 $routeParametersCollection = $this->getRouteRequirements($routeName);
 
                 foreach ($routeParametersCollection as $routeParameters) {
-                    $url = $this->router->generate($routeName, $routeParameters);
+                    // Use the absolute url parameters to preserve the route configuration, especially if an host is
+                    // configured in the Symfony routing
+                    $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
                     $collection->add(new Url($url, $this->getName()));
                 }
             } else {
-                $url = $this->router->generate($routeName);
+                $url = $this->router->generate($routeName, [], Router::ABSOLUTE_URL);
                 $collection->add(new Url($url, $this->getName()));
             }
         }

@@ -129,7 +129,7 @@ class SymfonyRoutingProviderTest extends BaseTestCase
         $router
             ->expects($this->once())
             ->method('generate')
-            ->with('panda_route')
+            ->with('panda_route', [], 0)
             ->willReturn('/forest/bamboos')
         ;
 
