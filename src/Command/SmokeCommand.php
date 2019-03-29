@@ -128,7 +128,7 @@ class SmokeCommand extends Command
         $this->io->title('Smoker Tests');
 
         $this->initializeCommand($input);
-        $this->smoke($this->host, $this->stopOnFailure);
+        $this->smoke($this->host);
         $this->generateResults();
     }
 
@@ -153,9 +153,8 @@ class SmokeCommand extends Command
 
     /**
      * @param string $host
-     * @param bool   $stopOnFailure
      */
-    protected function smoke(string $host, bool $stopOnFailure)
+    protected function smoke(string $host)
     {
         if (!$this->fileSystem->exists($this->cacheFile)) {
             $this->io->warning('The cache file is not generated. Nothing will be done.');
@@ -265,6 +264,16 @@ class SmokeCommand extends Command
         throw new Exception('The path "'.$path.'" is not supported by an url provider');
     }
 
+    /**
+     * @param string   $routeName
+     * @param string   $location
+     * @param Crawler  $crawler
+     * @param Response $response
+     *
+     * @return bool
+     *
+     * @throws \Exception
+     */
     protected function handleResponse(string $routeName, string $location, Crawler $crawler, Response $response): bool
     {
         $responseHandled = false;
@@ -298,8 +307,10 @@ class SmokeCommand extends Command
             } catch (\Exception $exception) {
                 $url = $this->host.$location;
                 $message = sprintf(
-                    'An error has occurred when processing the url %s',
-                    $url
+                    'An error has occurred when processing the url %s : %s (%s)',
+                    $url,
+                    $exception->getMessage(),
+                    $exception->getTraceAsString()
                 );
                 $this
                     ->messageCollector
