@@ -55,10 +55,7 @@ class MappingResolverTest extends BaseTestCase
             ])
             ->resolve('default', 'my_little_route')
         ;
-        $this->assertInternalType('array', $data);
-        $this->assertArrayHasKey('panda', $data);
-        $this->assertArrayHasKey('provider', $data['panda']);
-        $this->assertEquals('default', $data['panda']['provider']);
+        $this->assertEquals([], $data);
     }
 
     private function createResolver(array $mapping)

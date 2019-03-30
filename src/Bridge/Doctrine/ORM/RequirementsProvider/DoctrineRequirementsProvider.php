@@ -1,17 +1,17 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Requirements\Provider;
+namespace LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider;
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
+use LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProviderInterface;
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Exception\Url\UnsupportedUrlException;
 use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
+use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Traversable;
 
-class RequirementsProvider implements RequirementsProviderInterface
+class DoctrineRequirementsProvider implements RequirementsProviderInterface
 {
     private $name = 'default';
 
@@ -26,25 +26,25 @@ class RequirementsProvider implements RequirementsProviderInterface
     protected $mappingResolver;
 
     /**
-     * @var EntityManager
+     * @var DoctrineDataProviderInterface
      */
-    protected $entityManager;
+    protected $dataProvider;
 
     /**
      * RequirementsProvider constructor.
      *
-     * @param MappingResolverInterface $mappingResolver
-     * @param RouterInterface          $router
-     * @param EntityManagerInterface   $entityManager
+     * @param MappingResolverInterface      $mappingResolver
+     * @param RouterInterface               $router
+     * @param DoctrineDataProviderInterface $dataProvider
      */
     public function __construct(
         MappingResolverInterface $mappingResolver,
         RouterInterface $router,
-        EntityManagerInterface $entityManager
+        DoctrineDataProviderInterface $dataProvider
     ) {
         $this->mappingResolver = $mappingResolver;
         $this->router = $router;
-        $this->entityManager = $entityManager;
+        $this->dataProvider = $dataProvider;
     }
 
     /**
@@ -60,7 +60,7 @@ class RequirementsProvider implements RequirementsProviderInterface
      */
     public function supports(string $routeName): bool
     {
-        return null !== $this->findMapping($routeName);
+        return [] !== $this->mappingResolver->resolve($this->name, $routeName);
     }
 
     /**
@@ -68,24 +68,21 @@ class RequirementsProvider implements RequirementsProviderInterface
      */
     public function getRequirements(string $routeName, array $options = []): Traversable
     {
-        $mapping = $this->findMapping($routeName);
+        $mapping = $this->mappingResolver->resolve($this->name, $routeName);
 
-        if (null === $mapping) {
+        if ([] === $mapping) {
             throw new UnsupportedUrlException($routeName, $this->name);
         }
+        $entities = $this
+            ->dataProvider
+            ->getData($mapping['entity'], $mapping['options'])
+        ;
         $route = $this
             ->router
             ->getRouteCollection()
             ->get($routeName)
         ;
         $configuredRequirements = $route->getRequirements();
-
-        $repository = $this->entityManager->getRepository($mapping['entity']);
-        $entities = $repository
-            ->createQueryBuilder('entity')
-            ->getQuery()
-            ->iterate()
-        ;
         $accessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($entities as $row) {
@@ -118,26 +115,5 @@ class RequirementsProvider implements RequirementsProviderInterface
 
             yield $values;
         }
-    }
-
-    protected function findMapping(string $routeName): ?array
-    {
-        $mapping = $this->mappingResolver->resolve($this->name, $routeName);
-
-        foreach ($mapping as $mappingData) {
-            if (in_array($routeName, $mappingData['excludes'])) {
-                continue;
-            }
-
-            if (key_exists('route', $mappingData) && $routeName === $mappingData['route']) {
-                return $mappingData;
-            }
-
-            if (key_exists('pattern', $mappingData) && false !== strpos($routeName, $mappingData['pattern'])) {
-                return $mappingData;
-            }
-        }
-
-        return null;
     }
 }

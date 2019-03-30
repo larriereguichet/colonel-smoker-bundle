@@ -31,7 +31,7 @@ class BaseTestCase extends TestCase
     {
         $containerBuilder = new ContainerBuilder();
         $locator = new FileLocator([
-            __DIR__.'/../../src/Resources/config',
+            __DIR__.'/../../src/Resources/config/services',
         ]);
         $loader = new YamlFileLoader($containerBuilder, $locator);
         $loader->load('collectors.yaml');

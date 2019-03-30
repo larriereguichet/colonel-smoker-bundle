@@ -1,0 +1,55 @@
+lag_smoker:
+    routing:
+        scheme: http
+        host: 127.0.0.1
+        port: 8000
+        base_url: ~
+    routes:
+        app.homepage:
+            mapping: ~
+            handlers:
+                response_code: 200
+                content_type: text/html
+                html:
+                    h1: MyStaticText
+                    'div > .my-css-class > #my-id': A specific text
+        app.articles.show:
+            mapping: article
+            handlers:
+                response_code: 200
+                content_type: text/html
+                html:
+                    h1: '{{ entity.title }}'
+                    div: '{{ entity.content }}'
+    mapping:
+        article:
+            entity: App\Entity\Article
+            pattern: 'article'
+            excludes:
+                - app.excluded_route
+            provider: doctrine
+            options:
+                alias: entity
+                requirements:
+                    id: id
+                    categorySlug: category.slug
+                    slug: slug
+                    email: comments.first.authorEmail
+                    year: year
+                    month: month
+                    day: day
+                where:
+                    - 'entity.enabled = true'
+
+        tag:
+            entity: App\Entity\Tag
+            provider: default
+            pattern: tag
+            requirements:
+                tagSlug: slug
+
+        partner:
+            entity: App\Entity\Partner
+            route: lecomptoir.partner
+            requirements:
+                partnerSlug: slug

@@ -37,14 +37,21 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     protected $mapping;
 
     /**
+     * @var array
+     */
+    protected $routingConfiguration;
+
+    /**
      * SymfonyRoutingProvider constructor.
      *
+     * @param array                        $routingConfiguration
      * @param array                        $routes
      * @param array                        $mapping
      * @param RouterInterface              $router
      * @param RequirementsProviderRegistry $requirementsProviderRegistry
      */
     public function __construct(
+        array $routingConfiguration,
         array $routes,
         array $mapping,
         RouterInterface $router,
@@ -54,6 +61,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
         $this->requirementsProviderRegistry = $requirementsProviderRegistry;
         $this->routes = $routes;
         $this->mapping = $mapping;
+        $this->routingConfiguration = $routingConfiguration;
     }
 
     /**
@@ -106,6 +114,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     {
         $collection = new UrlCollection();
         $routes = $this->router->getRouteCollection()->all();
+        $this->defineContext();
 
         foreach ($this->routes as $routeName => $routeOptions) {
             // The provided routes should be present in the Symfony routing
@@ -123,6 +132,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
                     // Use the absolute url parameters to preserve the route configuration, especially if an host is
                     // configured in the Symfony routing
                     $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
+
                     $collection->add(new Url($url, $this->getName()));
                 }
             } else {
@@ -178,5 +188,19 @@ class SymfonyRoutingProvider implements UrlProviderInterface
         }
 
         return false;
+    }
+
+    protected function defineContext(): void
+    {
+        $context = $this->router->getContext();
+        $context->setScheme($this->routingConfiguration['scheme']);
+        $context->setHost($this->routingConfiguration['host']);
+        $context->setBaseUrl($this->routingConfiguration['base_url']);
+
+        if ('https' === $context->getScheme()) {
+            $context->setHttpsPort($this->routingConfiguration['port']);
+        } else {
+            $context->setHttpPort($this->routingConfiguration['port']);
+        }
     }
 }
