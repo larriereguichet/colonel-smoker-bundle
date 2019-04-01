@@ -70,7 +70,7 @@ class SmokeCommand extends Command
     /**
      * @var string
      */
-    protected $host;
+    protected $routing;
 
     /**
      * @var bool
@@ -86,7 +86,7 @@ class SmokeCommand extends Command
      * SmokeCommand constructor.
      *
      * @param string                    $cacheDir
-     * @param string                    $host
+     * @param array                     $routing
      * @param array                     $routes
      * @param ResponseHandlerRegistry   $responseHandlerRegistry
      * @param UrlProviderRegistry       $urlProviderRegistry
@@ -95,7 +95,7 @@ class SmokeCommand extends Command
      */
     public function __construct(
         string $cacheDir,
-        string $host,
+        array $routing,
         array $routes,
         ResponseHandlerRegistry $responseHandlerRegistry,
         UrlProviderRegistry $urlProviderRegistry,
@@ -110,7 +110,7 @@ class SmokeCommand extends Command
         $this->fileSystem = new Filesystem();
         $this->urlProviderRegistry = $urlProviderRegistry;
         $this->messageCollector = $messageCollector;
-        $this->host = $host;
+        $this->routing = $routing;
         $this->routes = $routes;
     }
 
@@ -128,7 +128,7 @@ class SmokeCommand extends Command
         $this->io->title('Smoker Tests');
 
         $this->initializeCommand($input);
-        $this->smoke($this->host);
+        $this->smoke($this->routing, $this->stopOnFailure);
         $this->generateResults();
     }
 
@@ -139,7 +139,7 @@ class SmokeCommand extends Command
         $this->messageCollector->initialize();
 
         if ($input->getOption('host')) {
-            $this->host = $input->getOption('host');
+            $this->routing = $input->getOption('host');
         }
 
         if ($input->getOption('stop-on-failure')) {
@@ -154,7 +154,7 @@ class SmokeCommand extends Command
     /**
      * @param string $host
      */
-    protected function smoke(string $host)
+    protected function smoke()
     {
         if (!$this->fileSystem->exists($this->cacheFile)) {
             $this->io->warning('The cache file is not generated. Nothing will be done.');
@@ -169,7 +169,7 @@ class SmokeCommand extends Command
 
             while (false !== ($row = fgets($handle, 4096))) {
                 $data = unserialize($row);
-                $this->processRow($host, $data['location']);
+                $this->processRow($data['location']);
 
                 if (Output::VERBOSITY_DEBUG === $this->io->getVerbosity()) {
                     $this->io->write('  '.Helper::formatMemory(memory_get_usage(true)));
@@ -199,23 +199,20 @@ class SmokeCommand extends Command
     }
 
     /**
-     * @param string $host
      * @param string $location
-     *
-     * @throws \Exception
      */
-    protected function processRow(string $host, string $location): void
+    protected function processRow(string $location): void
     {
-        $this->io->write('Processing '.$host.$location.'...');
+        $this->io->write('Processing '.$location.'...');
 
         // Create a new empty client and fetch the request data
-        $crawler = $this->client->request('get', $host.$location);
+        $crawler = $this->client->request('get', $location);
         /** @var Response $response */
         $response = $this->client->getResponse();
 
         try {
             $routeName = $this->match($location);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this
                 ->messageCollector
                 ->addError(
@@ -264,16 +261,6 @@ class SmokeCommand extends Command
         throw new Exception('The path "'.$path.'" is not supported by an url provider');
     }
 
-    /**
-     * @param string   $routeName
-     * @param string   $location
-     * @param Crawler  $crawler
-     * @param Response $response
-     *
-     * @return bool
-     *
-     * @throws \Exception
-     */
     protected function handleResponse(string $routeName, string $location, Crawler $crawler, Response $response): bool
     {
         $responseHandled = false;
@@ -305,12 +292,10 @@ class SmokeCommand extends Command
                     ->addSuccess($location, 'Success for handler', $response->getStatus())
                 ;
             } catch (\Exception $exception) {
-                $url = $this->host.$location;
+                $url = $this->routing.$location;
                 $message = sprintf(
-                    'An error has occurred when processing the url %s : %s (%s)',
-                    $url,
-                    $exception->getMessage(),
-                    $exception->getTraceAsString()
+                    'An error has occurred when processing the url %s',
+                    $url
                 );
                 $this
                     ->messageCollector

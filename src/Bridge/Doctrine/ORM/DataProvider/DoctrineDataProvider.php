@@ -4,6 +4,7 @@ namespace LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
 
@@ -47,7 +48,22 @@ class DoctrineDataProvider implements DoctrineDataProviderInterface
             ])
             ->setAllowedTypes('alias', 'string')
             ->setAllowedTypes('requirements', 'array')
-            ->setAllowedTypes('where', 'array')
+            ->setAllowedTypes('where', [
+                'array',
+                'string'
+            ])
+            ->setNormalizer('where', function (Options $options, $value) {
+                // Allow the configuration "where: article.enabled" instead of
+                // where:
+                //    - article.enabled
+                if (is_string($value)) {
+                    $value = [
+                        $value,
+                    ];
+                }
+
+                return $value;
+            })
         ;
 
         return $resolver->resolve($options);

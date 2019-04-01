@@ -31,10 +31,8 @@ class RequirementsProviderTest extends BaseTestCase
             ->method('resolve')
             ->with('default', 'the_silk_route')
             ->willReturn([
-                'silk_mapping' => [
-                    'excludes' => [],
-                    'route' => 'the_silk_route',
-                ],
+                'route' => 'the_silk_route',
+                'provider' => 'default',
             ]);
 
         $this->assertTrue($provider->supports('the_silk_route'));
@@ -49,14 +47,9 @@ class RequirementsProviderTest extends BaseTestCase
             ->expects($this->once())
             ->method('resolve')
             ->with('default', 'panda_route')
-            ->willReturn([
-                'excludes' => [
-                    'panda_route',
-                ],
-                'route' => 'wrong',
-            ]);
+            ->willReturn([]);
 
-        $this->assertTrue($provider->supports('panda_route'));
+        $this->assertFalse($provider->supports('panda_route'));
     }
 
     public function testSupportsWithExclusion()

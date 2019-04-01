@@ -25,35 +25,31 @@ class MappingResolver implements MappingResolverInterface
 
     public function resolve(string $providerName, string $routeName, bool $filterMappingData = true): array
     {
-        $providerMapping = [];
-
         foreach ($this->mapping as $name => $map) {
             $map = $this->resolveMap($map);
 
             if ($map['provider'] !== $providerName) {
                 continue;
             }
-            $providerMapping = $map;
-        }
+            if ([] === $map) {
+                continue;
+            }
 
-        if ([] === $providerMapping) {
-            return [];
-        }
+            if (false === $filterMappingData) {
+                return $map;
+            }
 
-        if (false === $filterMappingData) {
-            return $providerMapping;
-        }
+            if (in_array($routeName, $map['excludes'])) {
+                continue;
+            }
 
-        if (in_array($routeName, $providerMapping['excludes'])) {
-            return [];
-        }
+            if (key_exists('route', $map) && $routeName === $map['route']) {
+                return $map;
+            }
 
-        if (key_exists('route', $providerMapping) && $routeName === $providerMapping['route']) {
-            return $providerMapping;
-        }
-
-        if (key_exists('pattern', $providerMapping) && false !== strpos($routeName, $providerMapping['pattern'])) {
-            return $providerMapping;
+            if (key_exists('pattern', $map) && false !== strpos($routeName, $map['pattern'])) {
+                return $map;
+            }
         }
 
         return [];

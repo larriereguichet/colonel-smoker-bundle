@@ -11,7 +11,7 @@ lag_smoker:
                 response_code: 200
                 content_type: text/html
                 html:
-                    h1: MyStaticText
+                    h1: My h1 Title
                     'div > .my-css-class > #my-id': A specific text
         app.articles.show:
             mapping: article

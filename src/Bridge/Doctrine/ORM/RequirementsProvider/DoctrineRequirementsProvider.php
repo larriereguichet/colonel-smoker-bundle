@@ -60,8 +60,15 @@ class DoctrineRequirementsProvider implements RequirementsProviderInterface
      */
     public function supports(string $routeName): bool
     {
-        return [] !== $this->mappingResolver->resolve($this->name, $routeName);
+        $mapping = $this->mappingResolver->resolve($this->name, $routeName);
+
+        if ([] === $mapping) {
+            return false;
+        }
+
+        return $this->name === $mapping['provider'];
     }
+
 
     /**
      * {@inheritdoc}
