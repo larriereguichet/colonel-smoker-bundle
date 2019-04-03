@@ -3,6 +3,7 @@
 namespace LAG\SmokerBundle\Url\Provider;
 
 use Generator;
+use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use LAG\SmokerBundle\Url\Url;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
-class SymfonyRoutingProvider implements UrlProviderInterface
+class SymfonyUrlProvider implements UrlProviderInterface
 {
     /**
      * @var RouterInterface
@@ -75,8 +76,15 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function supports(string $path): bool
+    public function supports(string $url): bool
     {
+        $urlParts = parse_url($url);
+
+        if (!is_array($urlParts) || !key_exists('path', $urlParts)) {
+            return false;
+        }
+        $path = $urlParts['path'];
+
         try {
             $this->router->match($path);
         } catch (NoConfigurationException $exception) {
@@ -93,11 +101,21 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function match(string $path): string
+    public function match(string $url): array
     {
+        $urlParts = parse_url($url);
+
+        if (!is_array($urlParts) || !key_exists('path', $urlParts)) {
+            throw new Exception('Can not extract the path from the url "'.$url.'"');
+        }
+        $path = $urlParts['path'];
         $pathInfo = $this->router->match($path);
 
-        return $pathInfo['_route'];
+        if (!key_exists('path', $pathInfo)) {
+            $pathInfo['path'] = $path;
+        }
+
+        return $pathInfo;
     }
 
     /**

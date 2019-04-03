@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Goutte\Client;
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
+use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;
 
 class HtmlHandler extends AbstractHandler
@@ -38,17 +39,21 @@ class HtmlHandler extends AbstractHandler
         $mapping = $this->mappingResolver->resolve($this->getMappingName($routeName), $routeName);
 
         foreach ($configuration as $selector => $content) {
-            if ('{{' === substr($content, 0, 2) && '}}' === substr($content, -2)) {
+            if ($this->isDynamicString($content)) {
+                /** @var Response $response */
+                $response = $client->getResponse();
+                //$response->getHeader();
 
-
+                var_dump($mapping, $client->getResponse(), $crawler);
+                die;
 //                $provider = $this->registry->get('default');
 //                $provider->getRequirements($routeName, [
 //                    'where' => '',
 //                ]);
-            }
-
-            if (false === strpos($crawler->filter($selector)->text(), $content)) {
-                throw new Exception();
+            } else {
+                if (false === strpos($crawler->filter($selector)->text(), $content)) {
+                    throw new Exception();
+                }
             }
         }
     }
@@ -61,5 +66,18 @@ class HtmlHandler extends AbstractHandler
     public function getName(): string
     {
         return 'html';
+    }
+
+    protected function isDynamicString(string $content)
+    {
+        if ('{{' !== substr($content, 0, 2)) {
+            return false;
+        }
+
+        if ('}}' !== substr($content, -2)) {
+            return false;
+        }
+
+        return true;
     }
 }

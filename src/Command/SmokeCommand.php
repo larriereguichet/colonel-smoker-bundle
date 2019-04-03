@@ -128,7 +128,7 @@ class SmokeCommand extends Command
         $this->io->title('Smoker Tests');
 
         $this->initializeCommand($input);
-        $this->smoke($this->routing, $this->stopOnFailure);
+        $this->smoke();
         $this->generateResults();
     }
 
@@ -151,9 +151,6 @@ class SmokeCommand extends Command
         $this->client->followRedirects(false);
     }
 
-    /**
-     * @param string $host
-     */
     protected function smoke()
     {
         if (!$this->fileSystem->exists($this->cacheFile)) {
@@ -217,11 +214,11 @@ class SmokeCommand extends Command
                 ->messageCollector
                 ->addError(
                     $location,
-                    'An error has occurred when matching the path "'.$location.'"',
+                    $exception->getMessage(),
                     500,
                     $exception
                 );
-            $this->io->write('...[<comment>WARN</comment>]');
+            $this->io->write('...[<error>KO</error>]');
             $this->messageCollector->flush();
 
             return;
@@ -254,13 +251,28 @@ class SmokeCommand extends Command
             if (!$provider->supports($path)) {
                 continue;
             }
+            $routeInfo = $provider->match($path);
 
-            return $provider->match($path);
+            if (!key_exists('path', $routeInfo)) {
+                continue;
+            }
+
+            return $routeInfo['_route'];
         }
 
         throw new Exception('The path "'.$path.'" is not supported by an url provider');
     }
 
+    /**
+     * @param string   $routeName
+     * @param string   $location
+     * @param Crawler  $crawler
+     * @param Response $response
+     *
+     * @return bool
+     *
+     * @throws \Exception
+     */
     protected function handleResponse(string $routeName, string $location, Crawler $crawler, Response $response): bool
     {
         $responseHandled = false;
@@ -301,7 +313,7 @@ class SmokeCommand extends Command
                     ->messageCollector
                     ->addError($location, $message, $response->getStatus(), $exception)
                 ;
-                if (true === $this->stopOnFailure) {
+                if ($this->stopOnFailure) {
                     $this->generateResults();
 
                     throw $exception;

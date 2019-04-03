@@ -4,7 +4,7 @@ namespace LAG\SmokerBundle\Tests\Url\Provider;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use LAG\SmokerBundle\Tests\BaseTestCase;
-use LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider;
+use LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider;
 use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -233,14 +233,14 @@ class SymfonyRoutingProviderTest extends BaseTestCase
      * @param array $routes
      * @param array $mapping
      *
-     * @return MockObject[]|SymfonyRoutingProvider[]
+     * @return MockObject[]|SymfonyUrlProvider[]
      */
     private function createProvider(array $routingConfiguration = [], array $routes = [], array $mapping = [])
     {
         $router = $this->createMock(RouterInterface::class);
         $registry = $this->createMock(RequirementsProviderRegistry::class);
 
-        $provider = new SymfonyRoutingProvider($routingConfiguration, $routes, $mapping, $router, $registry);
+        $provider = new SymfonyUrlProvider($routingConfiguration, $routes, $mapping, $router, $registry);
 
         return [
             $provider,

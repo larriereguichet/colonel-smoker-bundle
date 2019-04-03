@@ -21,6 +21,7 @@ lag_smoker:
                 html:
                     h1: '{{ entity.title }}'
                     div: '{{ entity.content }}'
+                    a: Return to homepage
     mapping:
         article:
             entity: App\Entity\Article
@@ -40,14 +41,12 @@ lag_smoker:
                     day: day
                 where:
                     - 'entity.enabled = true'
-
         tag:
             entity: App\Entity\Tag
             provider: default
             pattern: tag
             requirements:
                 tagSlug: slug
-
         partner:
             entity: App\Entity\Partner
             route: lecomptoir.partner

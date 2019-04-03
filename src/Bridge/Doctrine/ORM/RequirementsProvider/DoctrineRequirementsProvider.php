@@ -60,7 +60,7 @@ class DoctrineRequirementsProvider implements RequirementsProviderInterface
      */
     public function supports(string $routeName): bool
     {
-        $mapping = $this->mappingResolver->resolve($this->name, $routeName);
+        $mapping = $this->mappingResolver->resolve($routeName);
 
         if ([] === $mapping) {
             return false;
@@ -69,16 +69,19 @@ class DoctrineRequirementsProvider implements RequirementsProviderInterface
         return $this->name === $mapping['provider'];
     }
 
-
     /**
      * {@inheritdoc}
      */
     public function getRequirements(string $routeName, array $options = []): Traversable
     {
-        $mapping = $this->mappingResolver->resolve($this->name, $routeName);
+        $mapping = $this->mappingResolver->resolve($routeName);
 
         if ([] === $mapping) {
             throw new UnsupportedUrlException($routeName, $this->name);
+        }
+
+        if ($this->name !== $mapping['provider']) {
+            throw new Exception('The provider "'.$this->name.'" does not support the route "'.$routeName.'"');
         }
         $entities = $this
             ->dataProvider

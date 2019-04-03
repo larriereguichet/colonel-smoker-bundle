@@ -23,17 +23,10 @@ class MappingResolver implements MappingResolverInterface
         $this->mapping = $mapping;
     }
 
-    public function resolve(string $providerName, string $routeName, bool $filterMappingData = true): array
+    public function resolve(string $routeName, bool $filterMappingData = true): array
     {
         foreach ($this->mapping as $name => $map) {
             $map = $this->resolveMap($map);
-
-            if ($map['provider'] !== $providerName) {
-                continue;
-            }
-            if ([] === $map) {
-                continue;
-            }
 
             if (false === $filterMappingData) {
                 return $map;

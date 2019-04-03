@@ -50,7 +50,7 @@ class DoctrineDataProvider implements DoctrineDataProviderInterface
             ->setAllowedTypes('requirements', 'array')
             ->setAllowedTypes('where', [
                 'array',
-                'string'
+                'string',
             ])
             ->setNormalizer('where', function (Options $options, $value) {
                 // Allow the configuration "where: article.enabled" instead of

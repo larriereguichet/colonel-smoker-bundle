@@ -5,3 +5,10 @@ services:
             - '%lag_smoker.routes%'
 
     LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface: '@LAG\SmokerBundle\Response\Handler\ResponseCodeHandler'
+
+    LAG\SmokerBundle\Response\Handler\HtmlHandler:
+        class: LAG\SmokerBundle\Response\Handler\HtmlHandler
+        arguments:
+            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface'
+            - '@Doctrine\ORM\EntityManagerInterface'
+            - '%lag_smoker.routes%'

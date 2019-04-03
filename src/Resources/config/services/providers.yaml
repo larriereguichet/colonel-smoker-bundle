@@ -1,6 +1,6 @@
 services:
-    LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider:
-        class: LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider
+    LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider:
+        class: LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider
         arguments:
             - '%lag_smoker.routing%'
             - '%lag_smoker.routes%'
@@ -23,4 +23,4 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
 
-    LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProvider'
+    LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider'

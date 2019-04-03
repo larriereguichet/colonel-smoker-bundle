@@ -4,5 +4,5 @@ namespace LAG\SmokerBundle\Url\Requirements\Mapping;
 
 interface MappingResolverInterface
 {
-    public function resolve(string $providerName, string $routeName): array;
+    public function resolve(string $routeName, bool $filterMappingData = true): array;
 }

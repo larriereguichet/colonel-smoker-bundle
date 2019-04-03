@@ -7,7 +7,7 @@ abstract class AbstractHandler implements ResponseHandlerInterface
     /**
      * @var array
      */
-    protected $configuration;
+    protected $configuration = [];
 
     /**
      * @return string
