@@ -1,6 +1,6 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Requirements\Mapping;
+namespace LAG\SmokerBundle\Contracts\Requirements\Mapping;
 
 interface MappingResolverInterface
 {

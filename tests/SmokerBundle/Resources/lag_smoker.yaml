@@ -24,7 +24,7 @@ lag_smoker:
                     a: Return to homepage
     mapping:
         article:
-            entity: App\Entity\Article
+            entity: App\JK\CmsBundle\Entity\Article
             pattern: 'article'
             excludes:
                 - app.excluded_route
@@ -43,7 +43,7 @@ lag_smoker:
                     - 'entity.enabled = true'
         tag:
             entity: App\Entity\Tag
-            provider: default
+            provider: symfony
             pattern: tag
             requirements:
                 tagSlug: slug

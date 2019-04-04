@@ -2,8 +2,8 @@
 
 namespace LAG\SmokerBundle\Response\Registry;
 
+use LAG\SmokerBundle\Contracts\Response\Handler\ResponseHandlerInterface;
 use LAG\SmokerBundle\Exception\Exception;
-use LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface;
 
 class ResponseHandlerRegistry
 {

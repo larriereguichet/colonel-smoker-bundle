@@ -1,6 +1,6 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Provider;
+namespace LAG\SmokerBundle\Contracts\Url\Provider;
 
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;

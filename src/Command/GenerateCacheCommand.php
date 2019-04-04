@@ -100,7 +100,7 @@ class GenerateCacheCommand extends Command
             $this->io->progressStart($urls->count());
 
             foreach ($urls->all() as $urlItem) {
-                $providerCache = $urlItem->serialize()."\n";
+                $providerCache = $urlItem->serialize().PHP_EOL;
                 $this->fileSystem->appendToFile($cacheFile, $providerCache);
                 $this->io->progressAdvance();
                 ++$urlCount;

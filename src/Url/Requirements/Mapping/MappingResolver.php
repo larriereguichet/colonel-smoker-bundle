@@ -2,6 +2,7 @@
 
 namespace LAG\SmokerBundle\Url\Requirements\Mapping;
 
+use LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;

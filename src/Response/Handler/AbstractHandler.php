@@ -2,6 +2,8 @@
 
 namespace LAG\SmokerBundle\Response\Handler;
 
+use LAG\SmokerBundle\Contracts\Response\Handler\ResponseHandlerInterface;
+
 abstract class AbstractHandler implements ResponseHandlerInterface
 {
     /**

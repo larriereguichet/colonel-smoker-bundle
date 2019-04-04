@@ -3,9 +3,9 @@
 namespace LAG\SmokerBundle\Tests\Url\Provider;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
 use LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider;
-use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -87,9 +87,9 @@ class SymfonyRoutingProviderTest extends BaseTestCase
                 '_route' => 'panda_route',
             ])
         ;
+        $info = $provider->match('/forest/bamboos');
 
-        $this->assertEquals('panda_route', $provider->match('/forest/bamboos'));
-
+        $this->assertEquals('panda_route', $info->getRouteName());
     }
 
     public function testConfigure()
@@ -190,7 +190,7 @@ class SymfonyRoutingProviderTest extends BaseTestCase
         ;
         $requirementProvider
             ->expects($this->once())
-            ->method('getRequirements')
+            ->method('getRequirementsData')
             ->willReturn(new ArrayCollection([
                 'panda' => [
                     'pandaName' => 'John The Panda',

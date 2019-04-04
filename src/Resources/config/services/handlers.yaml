@@ -4,11 +4,13 @@ services:
         arguments:
             - '%lag_smoker.routes%'
 
-    LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface: '@LAG\SmokerBundle\Response\Handler\ResponseCodeHandler'
+    LAG\SmokerBundle\Contracts\Response\Handler\ResponseHandlerInterface: '@LAG\SmokerBundle\Response\Handler\ResponseCodeHandler'
 
     LAG\SmokerBundle\Response\Handler\HtmlHandler:
         class: LAG\SmokerBundle\Response\Handler\HtmlHandler
         arguments:
-            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface'
+            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'
             - '@Doctrine\ORM\EntityManagerInterface'
+            - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'
+            - '@LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry'
             - '%lag_smoker.routes%'

@@ -5,11 +5,11 @@ namespace LAG\SmokerBundle\Tests\Bridge\Doctrine\ORM\DataProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProvider;
+use LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider;
 use LAG\SmokerBundle\Tests\BaseTestCase;
 use LAG\SmokerBundle\Tests\Fake\FakeQuery;
 
-class DoctrineDataProviderTest extends BaseTestCase
+class ORMDataProviderTest extends BaseTestCase
 {
     public function testGetData()
     {
@@ -49,7 +49,7 @@ class DoctrineDataProviderTest extends BaseTestCase
         ;
 
 
-        $provider = new DoctrineDataProvider($entityManager);
+        $provider = new ORMDataProvider($entityManager);
 
         $data = $provider->getData('MyClass', [
             'alias' => 'my_little_alias',

@@ -2,7 +2,7 @@ services:
     LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry:
         class: LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry
         calls:
-            - ['add', ['default', '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider']]
+            - ['add', ['default', '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider']]
 
     LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry:
         class: LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry

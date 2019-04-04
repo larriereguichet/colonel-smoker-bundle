@@ -3,6 +3,7 @@
 namespace LAG\SmokerBundle\Url\Provider;
 
 use Generator;
+use LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
@@ -112,14 +113,29 @@ class SymfonyUrlProvider implements UrlProviderInterface
         $path = $urlParts['path'];
         $routingInfo = $this->router->match($path);
 
-        $urlInfo = new UrlInfo();
-        $urlInfo->scheme = $urlParts['scheme'];
-        $urlInfo->host = $urlParts['host'];
-        $urlInfo->path = $urlParts['path'];
-        $urlInfo->query = $urlParts['query'];
-        $urlInfo->fragment = $urlParts['fragment'];
-        $urlInfo->routeName = $routingInfo['route'];
-        $urlInfo->extra = $routingInfo;
+        $resolver = new OptionsResolver();
+        $resolver
+            ->setDefaults([
+                'scheme' => '',
+                'host' => '',
+                'port' => 80,
+                'path' => '',
+                'query' => '',
+                'fragment' => '',
+            ])
+        ;
+        $urlParts = $resolver->resolve($urlParts);
+
+        $urlInfo = new UrlInfo(
+            $urlParts['scheme'],
+            $urlParts['host'],
+            (int) $urlParts['port'],
+            $urlParts['path'],
+            $urlParts['query'],
+            $urlParts['fragment'],
+            $routingInfo['_route'],
+            $routingInfo
+        );
 
         return $urlInfo;
     }
@@ -153,11 +169,17 @@ class SymfonyUrlProvider implements UrlProviderInterface
                 $routeParametersCollection = $this->getRouteRequirements($routeName);
 
                 foreach ($routeParametersCollection as $routeParameters) {
+                    $urlParameters = [];
+
+                    if (key_exists('_identifiers', $routeParameters)) {
+                        $urlParameters['identifiers'] = $routeParameters['_identifiers'];
+                        unset($routeParameters['_identifiers']);
+                    }
                     // Use the absolute url parameters to preserve the route configuration, especially if an host is
                     // configured in the Symfony routing
                     $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
 
-                    $collection->add(new Url($url, $this->getName()));
+                    $collection->add(new Url($url, $this->getName(), $urlParameters));
                 }
             } else {
                 $url = $this->router->generate($routeName, [], Router::ABSOLUTE_URL);
@@ -181,7 +203,7 @@ class SymfonyUrlProvider implements UrlProviderInterface
             if (!$requirementsProvider->supports($routeName)) {
                 continue;
             }
-            $requirements = $requirementsProvider->getRequirements($routeName);
+            $requirements = $requirementsProvider->getRequirementsData($routeName);
 
             foreach ($requirements as $values) {
                 $routeParameters = [];

@@ -8,19 +8,19 @@ services:
             - '@router'
             - '@LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry'
 
-    LAG\SmokerBundle\Url\Provider\UrlProviderInterface: '@LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider'
+    LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface: '@LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider'
 
-    LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider:
-        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider
+    LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider:
+        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider
         arguments:
-            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface'
+            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'
             - '@Symfony\Component\Routing\RouterInterface'
-            - '@LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProvider'
+            - '@LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider'
 
 
-    LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProvider:
-        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProvider
+    LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider:
+        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider
         arguments:
             - '@doctrine.orm.entity_manager'
 
-    LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider'
+    LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider'

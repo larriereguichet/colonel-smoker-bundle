@@ -3,9 +3,9 @@
 namespace LAG\SmokerBundle\Tests\Response\Handler;
 
 use Goutte\Client;
+use LAG\SmokerBundle\Contracts\Response\Handler\ResponseHandlerInterface;
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Response\Handler\ResponseCodeHandler;
-use LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;
@@ -65,8 +65,8 @@ class ResponseCodeHandlerTest extends BaseTestCase
     public function testHandleExpecting302()
     {
         $crawler = $this->createMock(Crawler::class);
-        $goutte = $this->createMock(Client::class);
-        $goutte
+        $client = $this->createMock(Client::class);
+        $client
             ->expects($this->exactly(2))
             ->method('getResponse')
             ->willReturn(new Response('', 302))
@@ -79,14 +79,14 @@ class ResponseCodeHandlerTest extends BaseTestCase
                 ],
             ]
         ]);
-        $handler->handle('existent_route', $crawler, $goutte);
+        $handler->handle('existent_route', $crawler, $client);
     }
 
     public function testHandleInvalidStatusCode()
     {
         $crawler = $this->createMock(Crawler::class);
-        $goutte = $this->createMock(Client::class);
-        $goutte
+        $client = $this->createMock(Client::class);
+        $client
             ->expects($this->exactly(2))
             ->method('getResponse')
             ->willReturn(new Response('', 302))
@@ -99,15 +99,15 @@ class ResponseCodeHandlerTest extends BaseTestCase
                 ],
             ]
         ]);
-        $this->assertExceptionRaised(Exception::class, function () use ($handler, $crawler, $goutte) {
-            $handler->handle('existent_route', $crawler, $goutte);
+        $this->assertExceptionRaised(Exception::class, function () use ($handler, $crawler, $client) {
+            $handler->handle('existent_route', $crawler, $client);
         });
     }
 
     public function testHandleWithInvalidCrawler()
     {
         $crawler = $this->createMock(Crawler::class);
-        $goutte = $this->createMock(Client::class);
+        $client = $this->createMock(Client::class);
 
         $handler = $this->createResponseHandler([
             'existent_route' => [
@@ -117,8 +117,8 @@ class ResponseCodeHandlerTest extends BaseTestCase
             ]
         ]);
 
-        $this->assertExceptionRaised(Exception::class, function () use ($handler, $crawler, $goutte) {
-            $handler->handle('existent_route', $crawler, $goutte);
+        $this->assertExceptionRaised(Exception::class, function () use ($handler, $crawler, $client) {
+            $handler->handle('existent_route', $crawler, $client);
         });
     }
 

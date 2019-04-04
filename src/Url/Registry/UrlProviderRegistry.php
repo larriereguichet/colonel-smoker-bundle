@@ -2,8 +2,8 @@
 
 namespace LAG\SmokerBundle\Url\Registry;
 
+use LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Exception\Exception;
-use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\UrlInfo;
 
 class UrlProviderRegistry

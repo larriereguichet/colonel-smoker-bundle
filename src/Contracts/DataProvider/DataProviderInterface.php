@@ -1,10 +1,10 @@
 <?php
 
-namespace LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider;
+namespace LAG\SmokerBundle\Contracts\DataProvider;
 
 use Traversable;
 
-interface DoctrineDataProviderInterface
+interface DataProviderInterface
 {
     /**
      * Return a traversable object with all entities of the repository associated to the given entity class.
@@ -15,4 +15,6 @@ interface DoctrineDataProviderInterface
      * @return Traversable
      */
     public function getData(string $class, array $options = []): Traversable;
+
+    public function getIdentifier(string $class): array;
 }

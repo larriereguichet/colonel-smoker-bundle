@@ -1,6 +1,6 @@
 <?php
 
-namespace LAG\SmokerBundle\Response\Handler;
+namespace LAG\SmokerBundle\Contracts\Response\Handler;
 
 use Goutte\Client;
 use LAG\SmokerBundle\Exception\Exception;

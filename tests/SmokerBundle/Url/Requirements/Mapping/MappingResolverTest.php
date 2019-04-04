@@ -2,9 +2,9 @@
 
 namespace LAG\SmokerBundle\Tests\Url\Requirements\Mapping;
 
+use LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
 use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver;
-use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 
 class MappingResolverTest extends BaseTestCase

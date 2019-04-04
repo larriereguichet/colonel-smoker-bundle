@@ -3,12 +3,13 @@
 namespace LAG\SmokerBundle\Tests\Url\Requirements\Provider;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\DoctrineDataProviderInterface;
-use LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\DoctrineRequirementsProvider;
+use LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider;
+use LAG\SmokerBundle\Contracts\DataProvider\DataProviderInterface;
+use LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface;
+use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
-use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
-use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use stdClass;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
@@ -17,7 +18,7 @@ class RequirementsProviderTest extends BaseTestCase
 {
     public function testServiceExists(): void
     {
-        $this->assertServiceExists(DoctrineRequirementsProvider::class);
+        $this->assertServiceExists(ORMRequirementsProvider::class);
         $this->assertServiceExists(RequirementsProviderInterface::class);
     }
 
@@ -29,7 +30,7 @@ class RequirementsProviderTest extends BaseTestCase
         $mappingResolver
             ->expects($this->once())
             ->method('resolve')
-            ->with('default', 'the_silk_route')
+            ->with('the_silk_route')
             ->willReturn([
                 'route' => 'the_silk_route',
                 'provider' => 'default',
@@ -46,7 +47,7 @@ class RequirementsProviderTest extends BaseTestCase
         $mappingResolver
             ->expects($this->once())
             ->method('resolve')
-            ->with('default', 'panda_route')
+            ->with('panda_route')
             ->willReturn([]);
 
         $this->assertFalse($provider->supports('panda_route'));
@@ -60,7 +61,7 @@ class RequirementsProviderTest extends BaseTestCase
         $mappingResolver
             ->expects($this->once())
             ->method('resolve')
-            ->with('default', 'panda_route')
+            ->with('panda_route')
             ->willReturn([])
         ;
 
@@ -81,9 +82,9 @@ class RequirementsProviderTest extends BaseTestCase
         $mappingResolver
             ->expects($this->once())
             ->method('resolve')
-            ->with('default', 'panda_route')
+            ->with('panda_route')
             ->willReturn([
-
+                    'provider' => 'default',
                     'excludes' => [],
                     'route' => 'panda_route',
                     'entity' => 'MyLittlePanda',
@@ -112,7 +113,7 @@ class RequirementsProviderTest extends BaseTestCase
             ->willReturn($routeCollection);
 
 
-        $entity = new \stdClass();
+        $entity = new stdClass();
         $entity->name = 'John The Panda';
 
         $dataProvider
@@ -121,7 +122,7 @@ class RequirementsProviderTest extends BaseTestCase
             ->willReturn(new ArrayCollection([
                 [$entity],
             ]));
-        $requirements = $provider->getRequirements('panda_route');
+        $requirements = $provider->getRequirementsData('panda_route');
 
         foreach ($requirements as $requirement) {
             $this->assertInternalType('array', $requirement);
@@ -133,15 +134,15 @@ class RequirementsProviderTest extends BaseTestCase
     }
 
     /**
-     * @return DoctrineRequirementsProvider[]|MockObject[]
+     * @return ORMRequirementsProvider[]|MockObject[]
      */
     private function createProvider(): array
     {
         $mappingResolver = $this->createMock(MappingResolverInterface::class);
         $router = $this->createMock(RouterInterface::class);
-        $dataProvider = $this->createMock(DoctrineDataProviderInterface::class);
+        $dataProvider = $this->createMock(DataProviderInterface::class);
 
-        $provider = new DoctrineRequirementsProvider(
+        $provider = new ORMRequirementsProvider(
             $mappingResolver,
             $router,
             $dataProvider
