@@ -208,7 +208,7 @@ class SmokeCommand extends Command
         $response = $this->client->getResponse();
 
         try {
-            $routeName = $this->match($location);
+            $urlInfo = $this->urlProviderRegistry->match($location);
         } catch (Exception $exception) {
             $this
                 ->messageCollector
@@ -223,7 +223,7 @@ class SmokeCommand extends Command
 
             return;
         }
-        $responseHandled = $this->handleResponse($routeName, $location, $crawler, $response);
+        $responseHandled = $this->handleResponse($urlInfo->routeName, $location, $crawler, $response);
 
         if (!$responseHandled) {
             $this->io->write('...[<comment>WARN</comment>]');
@@ -234,33 +234,6 @@ class SmokeCommand extends Command
         }
 
         $this->messageCollector->flush();
-    }
-
-    /**
-     * Return the route associated to the given path.
-     *
-     * @param string $path
-     *
-     * @return string
-     *
-     * @throws Exception
-     */
-    protected function match(string $path): string
-    {
-        foreach ($this->urlProviderRegistry->all() as $provider) {
-            if (!$provider->supports($path)) {
-                continue;
-            }
-            $routeInfo = $provider->match($path);
-
-            if (!key_exists('path', $routeInfo)) {
-                continue;
-            }
-
-            return $routeInfo['_route'];
-        }
-
-        throw new Exception('The path "'.$path.'" is not supported by an url provider');
     }
 
     /**

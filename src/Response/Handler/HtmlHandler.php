@@ -5,6 +5,7 @@ namespace LAG\SmokerBundle\Response\Handler;
 use Doctrine\ORM\EntityManagerInterface;
 use Goutte\Client;
 use LAG\SmokerBundle\Exception\Exception;
+use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;
@@ -21,9 +22,15 @@ class HtmlHandler extends AbstractHandler
      */
     private $entityManager;
 
+    /**
+     * @var UrlProviderRegistry
+     */
+    private $urlProviderRegistry;
+
     public function __construct(
         MappingResolverInterface $mappingResolver,
         EntityManagerInterface $entityManager,
+        UrlProviderRegistry $urlProviderRegistry,
         array $configuration = []
     ) {
         parent::__construct($configuration);
@@ -31,6 +38,7 @@ class HtmlHandler extends AbstractHandler
         $this->mappingResolver = $mappingResolver;
         $this->entityManager = $entityManager;
         $this->configuration = $configuration;
+        $this->urlProviderRegistry = $urlProviderRegistry;
     }
 
     public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void
@@ -44,7 +52,9 @@ class HtmlHandler extends AbstractHandler
                 $response = $client->getResponse();
                 //$response->getHeader();
 
-                var_dump($mapping, $client->getResponse(), $crawler);
+
+
+                var_dump($mapping, $client->getResponse());
                 die;
 //                $provider = $this->registry->get('default');
 //                $provider->getRequirements($routeName, [

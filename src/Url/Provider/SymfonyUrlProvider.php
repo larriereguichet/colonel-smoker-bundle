@@ -7,6 +7,7 @@ use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use LAG\SmokerBundle\Url\Url;
+use LAG\SmokerBundle\Url\UrlInfo;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\NoConfigurationException;
@@ -101,7 +102,7 @@ class SymfonyUrlProvider implements UrlProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function match(string $url): array
+    public function match(string $url): UrlInfo
     {
         $urlParts = parse_url($url);
 
@@ -109,13 +110,18 @@ class SymfonyUrlProvider implements UrlProviderInterface
             throw new Exception('Can not extract the path from the url "'.$url.'"');
         }
         $path = $urlParts['path'];
-        $pathInfo = $this->router->match($path);
+        $routingInfo = $this->router->match($path);
 
-        if (!key_exists('path', $pathInfo)) {
-            $pathInfo['path'] = $path;
-        }
+        $urlInfo = new UrlInfo();
+        $urlInfo->scheme = $urlParts['scheme'];
+        $urlInfo->host = $urlParts['host'];
+        $urlInfo->path = $urlParts['path'];
+        $urlInfo->query = $urlParts['query'];
+        $urlInfo->fragment = $urlParts['fragment'];
+        $urlInfo->routeName = $routingInfo['route'];
+        $urlInfo->extra = $routingInfo;
 
-        return $pathInfo;
+        return $urlInfo;
     }
 
     /**

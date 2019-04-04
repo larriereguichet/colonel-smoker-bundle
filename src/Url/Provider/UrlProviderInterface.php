@@ -4,6 +4,7 @@ namespace LAG\SmokerBundle\Url\Provider;
 
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
+use LAG\SmokerBundle\Url\UrlInfo;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 interface UrlProviderInterface
@@ -25,9 +26,9 @@ interface UrlProviderInterface
      *
      * @throws Exception
      *
-     * @return array
+     * @return UrlInfo
      */
-    public function match(string $url): array;
+    public function match(string $url): UrlInfo;
 
     /**
      * Return true if the given url is supported by the provider.

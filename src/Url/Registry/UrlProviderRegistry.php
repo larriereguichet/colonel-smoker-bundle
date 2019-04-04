@@ -4,6 +4,7 @@ namespace LAG\SmokerBundle\Url\Registry;
 
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
+use LAG\SmokerBundle\Url\UrlInfo;
 
 class UrlProviderRegistry
 {
@@ -61,5 +62,28 @@ class UrlProviderRegistry
     public function all(): array
     {
         return $this->registry;
+    }
+
+    /**
+     * Return information about the given url like the http parts of the url (host, scheme...), the route name and some
+     * extra data according to the provider.
+     *
+     * @param string $url
+     *
+     * @return UrlInfo
+     *
+     * @throws Exception
+     */
+    public function match(string $url): UrlInfo
+    {
+        foreach ($this->all() as $provider) {
+            if (!$provider->supports($url)) {
+                continue;
+            }
+            // Return only the first matching result
+            return $provider->match($url);
+        }
+
+        throw new Exception('The path "'.$url.'" is not supported by an url provider');
     }
 }
