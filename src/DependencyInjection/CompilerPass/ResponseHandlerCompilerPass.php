@@ -2,7 +2,7 @@
 
 namespace LAG\SmokerBundle\DependencyInjection\CompilerPass;
 
-use LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface;
+use LAG\SmokerBundle\Contracts\Response\Handler\ResponseHandlerInterface;
 use LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -12,6 +12,9 @@ class ResponseHandlerCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
+        if (!$container->hasDefinition(ResponseHandlerRegistry::class)) {
+            return;
+        }
         $registry = $container->getDefinition(ResponseHandlerRegistry::class);
 
         foreach ($container->getDefinitions() as $serviceId => $definition) {

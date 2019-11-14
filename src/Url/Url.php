@@ -2,7 +2,9 @@
 
 namespace LAG\SmokerBundle\Url;
 
-class Url implements \Serializable
+use LAG\SmokerBundle\Exception\Exception;
+
+class Url
 {
     /**
      * @var string
@@ -15,15 +17,22 @@ class Url implements \Serializable
     protected $providerName;
 
     /**
+     * @var array
+     */
+    protected $options;
+
+    /**
      * Url constructor.
      *
      * @param string $location
      * @param string $providerName
+     * @param array  $options
      */
-    public function __construct(string $location, string $providerName)
+    public function __construct(string $location, string $providerName, array $options = [])
     {
         $this->location = $location;
         $this->providerName = $providerName;
+        $this->options = $options;
     }
 
     public function serialize(): string
@@ -31,26 +40,19 @@ class Url implements \Serializable
         return serialize([
             'location' => $this->location,
             'providerName' => $this->providerName,
+            'options' => $this->options,
         ]);
     }
 
-    /**
-     * Constructs the object.
-     *
-     * @see https://php.net/manual/en/serializable.unserialize.php
-     *
-     * @param string $serialized <p>
-     *                           The string representation of the object.
-     *                           </p>
-     *
-     * @since 5.1.0
-     */
-    public function unserialize($serialized)
+    public static function deserialize(string $serialized): Url
     {
         $data = unserialize($serialized);
 
-        $this->location = $data['location'];
-        $this->providerName = $data['providerName'];
+        return new Url(
+            $data['location'],
+            $data['providerName'],
+            $data['options']
+        );
     }
 
     /**
@@ -67,5 +69,27 @@ class Url implements \Serializable
     public function getProviderName(): string
     {
         return $this->providerName;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    public function hasOption(string $name): bool
+    {
+        return key_exists($name, $this->options);
+    }
+
+    public function getOption(string $name)
+    {
+        if (!$this->hasOption($name)) {
+            throw new Exception('Unknown options "'.$name.'"');
+        }
+
+        return $this->options[$name];
     }
 }

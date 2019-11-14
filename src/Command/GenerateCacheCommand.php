@@ -92,16 +92,15 @@ class GenerateCacheCommand extends Command
 
         foreach ($this->registry->all() as $provider) {
             $this->io->text('Processing the url provider "'.$provider->getName().'"...');
+
             $resolver = new OptionsResolver();
             $provider->configure($resolver);
-            $options = $resolver->resolve();
-
-            $urls = $provider->getCollection($options);
+            $urls = $provider->getCollection($resolver->resolve());
 
             $this->io->progressStart($urls->count());
 
             foreach ($urls->all() as $urlItem) {
-                $providerCache = $urlItem->serialize()."\n";
+                $providerCache = $urlItem->serialize().PHP_EOL;
                 $this->fileSystem->appendToFile($cacheFile, $providerCache);
                 $this->io->progressAdvance();
                 ++$urlCount;

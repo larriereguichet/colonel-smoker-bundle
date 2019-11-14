@@ -3,9 +3,12 @@
 namespace LAG\SmokerBundle\Url\Provider;
 
 use Generator;
+use LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface;
+use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use LAG\SmokerBundle\Url\Url;
+use LAG\SmokerBundle\Url\UrlInfo;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\NoConfigurationException;
@@ -14,7 +17,7 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
-class SymfonyRoutingProvider implements UrlProviderInterface
+class SymfonyUrlProvider implements UrlProviderInterface
 {
     /**
      * @var RouterInterface
@@ -37,14 +40,21 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     protected $mapping;
 
     /**
+     * @var array
+     */
+    protected $routingConfiguration;
+
+    /**
      * SymfonyRoutingProvider constructor.
      *
+     * @param array                        $routingConfiguration
      * @param array                        $routes
      * @param array                        $mapping
      * @param RouterInterface              $router
      * @param RequirementsProviderRegistry $requirementsProviderRegistry
      */
     public function __construct(
+        array $routingConfiguration,
         array $routes,
         array $mapping,
         RouterInterface $router,
@@ -54,6 +64,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
         $this->requirementsProviderRegistry = $requirementsProviderRegistry;
         $this->routes = $routes;
         $this->mapping = $mapping;
+        $this->routingConfiguration = $routingConfiguration;
     }
 
     /**
@@ -67,8 +78,15 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function supports(string $path): bool
+    public function supports(string $url): bool
     {
+        $urlParts = parse_url($url);
+
+        if (!is_array($urlParts) || !key_exists('path', $urlParts)) {
+            return false;
+        }
+        $path = $urlParts['path'];
+
         try {
             $this->router->match($path);
         } catch (NoConfigurationException $exception) {
@@ -85,11 +103,41 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function match(string $path): string
+    public function match(string $url): UrlInfo
     {
-        $pathInfo = $this->router->match($path);
+        $urlParts = parse_url($url);
 
-        return $pathInfo['_route'];
+        if (!is_array($urlParts) || !key_exists('path', $urlParts)) {
+            throw new Exception('Can not extract the path from the url "'.$url.'"');
+        }
+        $path = $urlParts['path'];
+        $routingInfo = $this->router->match($path);
+
+        $resolver = new OptionsResolver();
+        $resolver
+            ->setDefaults([
+                'scheme' => '',
+                'host' => '',
+                'port' => 80,
+                'path' => '',
+                'query' => '',
+                'fragment' => '',
+            ])
+        ;
+        $urlParts = $resolver->resolve($urlParts);
+
+        $urlInfo = new UrlInfo(
+            $urlParts['scheme'],
+            $urlParts['host'],
+            (int) $urlParts['port'],
+            $urlParts['path'],
+            $urlParts['query'],
+            $urlParts['fragment'],
+            $routingInfo['_route'],
+            $routingInfo
+        );
+
+        return $urlInfo;
     }
 
     /**
@@ -106,6 +154,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
     {
         $collection = new UrlCollection();
         $routes = $this->router->getRouteCollection()->all();
+        $this->defineContext();
 
         foreach ($this->routes as $routeName => $routeOptions) {
             // The provided routes should be present in the Symfony routing
@@ -120,10 +169,17 @@ class SymfonyRoutingProvider implements UrlProviderInterface
                 $routeParametersCollection = $this->getRouteRequirements($routeName);
 
                 foreach ($routeParametersCollection as $routeParameters) {
+                    $urlParameters = [];
+
+                    if (key_exists('_identifiers', $routeParameters)) {
+                        $urlParameters['identifiers'] = $routeParameters['_identifiers'];
+                        unset($routeParameters['_identifiers']);
+                    }
                     // Use the absolute url parameters to preserve the route configuration, especially if an host is
                     // configured in the Symfony routing
                     $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
-                    $collection->add(new Url($url, $this->getName()));
+
+                    $collection->add(new Url($url, $this->getName(), $urlParameters));
                 }
             } else {
                 $url = $this->router->generate($routeName, [], Router::ABSOLUTE_URL);
@@ -147,7 +203,7 @@ class SymfonyRoutingProvider implements UrlProviderInterface
             if (!$requirementsProvider->supports($routeName)) {
                 continue;
             }
-            $requirements = $requirementsProvider->getRequirements($routeName);
+            $requirements = $requirementsProvider->getRequirementsData($routeName);
 
             foreach ($requirements as $values) {
                 $routeParameters = [];
@@ -178,5 +234,19 @@ class SymfonyRoutingProvider implements UrlProviderInterface
         }
 
         return false;
+    }
+
+    protected function defineContext(): void
+    {
+        $context = $this->router->getContext();
+        $context->setScheme($this->routingConfiguration['scheme']);
+        $context->setHost($this->routingConfiguration['host']);
+        $context->setBaseUrl($this->routingConfiguration['base_url']);
+
+        if ('https' === $context->getScheme()) {
+            $context->setHttpsPort($this->routingConfiguration['port']);
+        } else {
+            $context->setHttpPort($this->routingConfiguration['port']);
+        }
     }
 }

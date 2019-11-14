@@ -7,48 +7,15 @@ use Goutte\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 
-class ResponseCodeHandler implements ResponseHandlerInterface
+class ResponseCodeHandler extends AbstractHandler
 {
-    private $name = 'response_code';
-
-    /**
-     * @var array
-     */
-    private $routes;
-
-    /**
-     * ResponseCodeHandler constructor.
-     *
-     * @param array $routes
-     */
-    public function __construct(array $routes = [])
-    {
-        $this->routes = $routes;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function supports(string $routeName): bool
-    {
-        if (!key_exists($routeName, $this->routes)) {
-            return false;
-        }
-
-        if (!key_exists('handlers', $this->routes[$routeName])) {
-            return false;
-        }
-
-        return key_exists($this->name, $this->routes[$routeName]['handlers']);
-    }
-
     /**
      * {@inheritdoc}
      */
     public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void
     {
         $expectedResponseCode = Response::HTTP_OK;
-        $configuration = $this->routes[$routeName]['handlers'][$this->name];
+        $configuration = $this->configuration[$routeName]['handlers'][$this->getName()];
 
         if (!is_array($configuration)) {
             $expectedResponseCode = $configuration;
@@ -71,6 +38,6 @@ class ResponseCodeHandler implements ResponseHandlerInterface
      */
     public function getName(): string
     {
-        return $this->name;
+        return 'response_code';
     }
 }

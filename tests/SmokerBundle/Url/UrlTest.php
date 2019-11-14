@@ -14,15 +14,21 @@ class UrlTest extends BaseTestCase
         $serialized = serialize([
             'location' => '/pandas',
             'providerName' => 'panda',
+            'options' => [],
         ]);
         $this->assertEquals($serialized, $url->serialize());
 
         $serialized = serialize([
             'location' => '/bamboos',
             'providerName' => 'bamboo',
+            'options' => [
+                'an_option' => 'a value',
+            ],
         ]);
-        $url->unserialize($serialized);
+
+        $url = Url::deserialize($serialized);
         $this->assertEquals('/bamboos', $url->getLocation());
         $this->assertEquals('bamboo', $url->getProviderName());
+        $this->assertEquals('a value', $url->getOption('an_option'));
     }
 }

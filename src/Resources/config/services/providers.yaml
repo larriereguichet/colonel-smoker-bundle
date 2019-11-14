@@ -1,0 +1,26 @@
+services:
+    LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider:
+        class: LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider
+        arguments:
+            - '%lag_smoker.routing%'
+            - '%lag_smoker.routes%'
+            - '%lag_smoker.mapping%'
+            - '@router'
+            - '@LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry'
+
+    LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface: '@LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider'
+
+    LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider:
+        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider
+        arguments:
+            - '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'
+            - '@Symfony\Component\Routing\RouterInterface'
+            - '@LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider'
+
+
+    LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider:
+        class: LAG\SmokerBundle\Bridge\Doctrine\ORM\DataProvider\ORMDataProvider
+        arguments:
+            - '@doctrine.orm.entity_manager'
+
+    LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface: '@LAG\SmokerBundle\Bridge\Doctrine\ORM\RequirementsProvider\ORMRequirementsProvider'

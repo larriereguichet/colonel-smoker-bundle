@@ -2,9 +2,9 @@
 
 namespace LAG\SmokerBundle\Tests\Url\Requirements\Registry;
 
+use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Tests\BaseTestCase;
-use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 
 class RequirementsProviderRegistryTest extends BaseTestCase

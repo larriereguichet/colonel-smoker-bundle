@@ -2,6 +2,7 @@
 
 namespace LAG\SmokerBundle\Url\Requirements\Mapping;
 
+use LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -23,20 +24,29 @@ class MappingResolver implements MappingResolverInterface
         $this->mapping = $mapping;
     }
 
-    public function resolve(string $providerName, string $routeName): array
+    public function resolve(string $routeName, bool $filterMappingData = true): array
     {
-        $providerMapping = [];
-
         foreach ($this->mapping as $name => $map) {
             $map = $this->resolveMap($map);
 
-            if ($map['provider'] !== $providerName) {
+            if (false === $filterMappingData) {
+                return $map;
+            }
+
+            if (in_array($routeName, $map['excludes'])) {
                 continue;
             }
-            $providerMapping[$name] = $map;
+
+            if (key_exists('route', $map) && $routeName === $map['route']) {
+                return $map;
+            }
+
+            if (key_exists('pattern', $map) && false !== strpos($routeName, $map['pattern'])) {
+                return $map;
+            }
         }
 
-        return $providerMapping;
+        return [];
     }
 
     protected function resolveMap(array $map)
@@ -48,7 +58,8 @@ class MappingResolver implements MappingResolverInterface
                 'pattern' => null,
                 'requirements' => [],
                 'excludes' => [],
-                'provider' => 'default',
+                'provider' => 'doctrine',
+                'options' => [],
             ])
             ->setRequired([
                 'entity',
@@ -64,6 +75,7 @@ class MappingResolver implements MappingResolverInterface
             ->setAllowedTypes('provider', 'string')
             ->setAllowedTypes('entity', 'string')
             ->setAllowedTypes('requirements', 'array')
+            ->setAllowedTypes('options', 'array')
             ->setNormalizer('route', function (Options $options, $value) {
                 if (null === $value && null === $options->offsetGet('pattern')) {
                     throw new InvalidOptionsException('A pattern or a route should be provided');

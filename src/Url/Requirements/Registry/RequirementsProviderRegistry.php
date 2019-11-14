@@ -3,7 +3,7 @@
 namespace LAG\SmokerBundle\Url\Requirements\Registry;
 
 use LAG\SmokerBundle\Exception\Exception;
-use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
+use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
 
 class RequirementsProviderRegistry
 {

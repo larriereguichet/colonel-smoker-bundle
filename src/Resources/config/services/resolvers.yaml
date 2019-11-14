@@ -4,4 +4,4 @@ services:
         arguments:
             - '%lag_smoker.mapping%'
 
-    LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface: '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'
+    LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface: '@LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver'

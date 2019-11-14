@@ -3,15 +3,16 @@
 namespace LAG\SmokerBundle\Tests\Url\Provider;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
-use LAG\SmokerBundle\Url\Provider\SymfonyRoutingProvider;
-use LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface;
+use LAG\SmokerBundle\Url\Provider\SymfonyUrlProvider;
 use LAG\SmokerBundle\Url\Requirements\Registry\RequirementsProviderRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\NoConfigurationException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
@@ -86,9 +87,9 @@ class SymfonyRoutingProviderTest extends BaseTestCase
                 '_route' => 'panda_route',
             ])
         ;
+        $info = $provider->match('/forest/bamboos');
 
-        $this->assertEquals('panda_route', $provider->match('/forest/bamboos'));
-
+        $this->assertEquals('panda_route', $info->getRouteName());
     }
 
     public function testConfigure()
@@ -104,6 +105,11 @@ class SymfonyRoutingProviderTest extends BaseTestCase
     public function testGetCollection()
     {
         list($provider, $router) = $this->createProvider([
+            'scheme' => 'http',
+            'host' => '127.0.0.1',
+            'port' => '8000',
+            'base_url' => null,
+        ],[
             'panda_route' => [
                 'provider' => 'symfony',
             ],
@@ -121,6 +127,8 @@ class SymfonyRoutingProviderTest extends BaseTestCase
                 'panda_route' => new Route('/forest/bamboos'),
             ])
         ;
+
+        $requestContext = new RequestContext();
         $router
             ->expects($this->once())
             ->method('getRouteCollection')
@@ -132,6 +140,11 @@ class SymfonyRoutingProviderTest extends BaseTestCase
             ->with('panda_route', [], 0)
             ->willReturn('/forest/bamboos')
         ;
+        $router
+            ->expects($this->once())
+            ->method('getContext')
+            ->willReturn($requestContext)
+        ;
 
         $urls = $provider->getCollection();
 
@@ -141,6 +154,11 @@ class SymfonyRoutingProviderTest extends BaseTestCase
     public function testGetCollectionWithRequirements()
     {
         list($provider, $router, $registry) = $this->createProvider([
+            'scheme' => 'http',
+            'host' => '127.0.0.1',
+            'port' => '8000',
+            'base_url' => null,
+        ], [
             'panda_route' => [
                 'provider' => 'symfony',
             ],
@@ -172,7 +190,7 @@ class SymfonyRoutingProviderTest extends BaseTestCase
         ;
         $requirementProvider
             ->expects($this->once())
-            ->method('getRequirements')
+            ->method('getRequirementsData')
             ->willReturn(new ArrayCollection([
                 'panda' => [
                     'pandaName' => 'John The Panda',
@@ -187,6 +205,12 @@ class SymfonyRoutingProviderTest extends BaseTestCase
             ])
         ;
 
+        $requestContext = new RequestContext();
+        $router
+            ->expects($this->once())
+            ->method('getContext')
+            ->willReturn($requestContext)
+        ;
         $router
             ->expects($this->once())
             ->method('getRouteCollection')
@@ -205,17 +229,18 @@ class SymfonyRoutingProviderTest extends BaseTestCase
     }
 
     /**
+     * @param array $routingConfiguration
      * @param array $routes
      * @param array $mapping
      *
-     * @return MockObject[]|SymfonyRoutingProvider[]
+     * @return MockObject[]|SymfonyUrlProvider[]
      */
-    private function createProvider(array $routes = [], array $mapping = [])
+    private function createProvider(array $routingConfiguration = [], array $routes = [], array $mapping = [])
     {
         $router = $this->createMock(RouterInterface::class);
         $registry = $this->createMock(RequirementsProviderRegistry::class);
 
-        $provider = new SymfonyRoutingProvider($routes, $mapping, $router, $registry);
+        $provider = new SymfonyUrlProvider($routingConfiguration, $routes, $mapping, $router, $registry);
 
         return [
             $provider,

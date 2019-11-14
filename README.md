@@ -9,9 +9,16 @@
 
 The **Colonel Smoker** is an expert in smoke. He can even tell if your application is smoking before deploying it to production.
 
-The **Colonel Smoker** find the URLs of your Symfony application (only Symfony is supported now) and looks for `500` errors. 
+The **Colonel Smoker** find the URLs of your Symfony application (only Symfony is supported now) and looks for `500` errors.
+
+Main features : 
 - helps providing requirements parameters for your dynamic URLs
 - uses the routes declared in the Symfony routing by default
+- check for response code
+- check if the resulted html contains dynamic data from your entity
+
+The goal is to ensure that each urls in your application does not contains critical errors. It is especially designed 
+for application which have pages  with complex and dynamic data to display. 
 
 > This bundle relies on Symfony service injection. If your are not familiar with this, you can read documentation [here](https://symfony.com/doc/current/service_container.html)
 
@@ -23,7 +30,7 @@ composer require --dev lag/colonel-smoker-bundle
 
 ## Configuration
 ```yaml
-# config/packages/dev/lag_smoker.yaml
+# config/packages/test/lag_smoker.yaml
 lag_smoker:
     host: 'http://127.0.0.1:8000/' # This is the default configuration
     # This route will be used to generated urls to test against
@@ -38,7 +45,7 @@ lag_smoker:
         # This name can be anything, but it has to be unique
         article:
             # This mapping will be used with the Article entity of your application
-            entity: App\Entity\Article
+            entity: App\JK\CmsBundle\Entity\Article
             # The property id in the route parameters (/articles/{id} for example) will be mapped with id property of your entity
             requirements:
                 id: id
@@ -55,7 +62,20 @@ bin/console smoker:generate-cache
 bin/console smoker:smoke
 ```
 
-> If you use the Symfony WebServer bundle, dont forget to run `bin/console server:start`.
+> If you use the Symfony WebServer bundle, dont forget to run `bin/console server:start --env=test`.
+
+## How it works
+The **Colonel Smoker** will read the configuration and use the Symfony routing to build the urls of your application. 
+Urls are stored in a cache. Then he calls each urls and analyze the response to find 500 errors. But it can tests more 
+like if the html contains some static or dynamic values.
+
+For example, if your application handles articles, the **Colonel Smoker** can check if the page displaying the article 
+contains the article title. 
+
+## Documentation
+1. [Getting started](https://github.com/larriereguichet/colonel-smoker-bundle/tree/master/src/Resources/docs/1.GettingStarted.md)
+2. [Build Urls](https://github.com/larriereguichet/colonel-smoker-bundle/tree/master/src/Resources/docs/2.BuildUrls.md)
+2. [ResponseHandlers](https://github.com/larriereguichet/colonel-smoker-bundle/tree/master/src/Resources/docs/3.ResponseHandlers.md)
 
 ## Reference Configuration
 ```yaml
@@ -73,182 +93,24 @@ lag_smoker:
                 response_code: 302
      mapping:
         article:
-            entity: App\Entity\Article
-            provider: default
+            entity: App\JK\CmsBundle\Entity\Article
+            provider: symfony
             pattern: 'app.article_'
             excludes:
                 - app.article.excluded_routes
             requirements:
                 id: id
                 categorySlug: category.slug
-```
-## URL Providers
-### Symfony provider
-The **Colonel Smoker** provides a built-in provider named 'symfony' which use the Symfony routing of your application 
-to build urls.
-
-However you can create your own provider. 
-
-### Custom provider
-You can create a custom url provider by declaring a service which implements `LAG\SmokerBundle\Url\Provider\UrlProviderInterface`.
-
-```php
-class MyCustomUrlProvider implements UrlProviderInterface
-{
-    public function getCollection(array $options = []): UrlCollection
-    {
-        $collection = new UrlCollection();
         
-        // Fill the collection with your urls
-        
-        return $collection;
-    }
-
-    public function match(string $path): string
-    {
-        // The provider should be able to match an url and give the route name
-        $routeName = '...';
-        
-        return $routeName;
-    }
-
-    public function supports(string $path): bool
-    {
-        // The provider should be able to say if the given path is supported
-        return $path === '/articles";
-    }
-
-    public function configure(OptionsResolver $resolver)
-    {
-    }
-
-    public function getName(): string
-    {
-        return 'my_little_provider';
-    }
-}
-```
-Then configure your routes to use it:
-```yaml
-lag_smoker:
-    # ...
-    app.homepage:
-        provider: symfony # this is the default configuration
-    my_weird_route:
-        provider: my_little_provider
-```
- 
-## Handle dynamic URLs
-Most of the urls of a website are dynamic. They require dynamic parameters to be build. The **Colonel Smoker** has a 
-built-in requirements provider using Doctrine to find parameter values. This is useful as in most Symfony's application,
-urls are build using data from the database.
-
-### Doctrine provider
-The **Colonel Smoker** comes with a built-in requirements providers for routes. It use the Doctrine ORM to find data to
-fill urls dynamic values. It can also handle static values.
-
-The mapping between database data and urls parameters can be configured in the `mapping` section as following :
-```yaml
-lag_smoker:
-     mapping:
-        # A unique name
-        article:
-            # It should the fully-qualified class name of a valid entity            
-            entity: App\Entity\Article
-            # This is the default value, you can omit it 
-            provider: default
-            # The pattern for the routes related to the entity. This example will take all routes with a name containing app.article_ 
-            pattern: 'app.article_'
-            # But it will excludes this specific routes
-            excludes:
-                - app.article.excluded_route
-            # Requirements are mandatory
-            requirements:
-                # This will map the "id" parameters contained in routes with the id property of the entity
-                # To get the value, it will search for getId() or public property id
-                id: id
-                # It can also take a value from a linked entity, for example the slug of the article category
-                categorySlug: category.slug
-                slug: slug
-                # This value is static, it should be preceded by @
-                version: '@v1'
-```
-This configuration will map all routes with a name containing the pattern `app.article` but the route `app.article.excluded_route`.
-The **Colonel Smoker** will use the Doctrine ORM to find all `Article` entities, and get an url for each of them.
-
-Parameters required for some routes will be filled with values found using the given mapping in the requirements section
-of the configuration.
-
-For example, the route "app.article_show" which is defined with `/articles/{id}` will be generated for each Article in
-your database, and the `id` parameters will be mapped with the getId() method of your entities. For the route "app.articles_by_category" 
-(`/{categorySlug}/{slug}) will be mapped by the getCategory()->getSlug() methods (or public properties) and the slug 
-parameters by the getSlug() method of the article entity.
-
-You can also pass static values for some reason. To do this, just add `@` before the value. 
-
-### Custom provider
-You can use a custom requirements provider by declaring a service which implements `\LAG\SmokerBundle\Url\Requirements\Provider\RequirementsProviderInterface`.
-
-```php
-   
-class MyRequirementsProvider implements RequirementsProviderInterface 
-{   
-    public function getName(): string
-    {
-        return 'my_provider';
-    }
-
-    public function supports(string $routeName): bool
-    {
-        return 'my_weird_route' === $routeName;
-    }
-
-    public function getRequirements(string $routeName, array $options = []): Traversable
-    {
-        // ...
-        foreach ($things as $stuff) {
-            $parameters = [
-                'id' => $stuff->getId(),
-            ];
-            yield $parameters;       
-       }
-    }
-```
-
-## Response handlers
-The **Colonel Smoker** use response handlers to test if the given response is valid to pass the test. It comes with a
-built-in handlers checking response status code. You can also add your own handlers to test the returned content for 
-example.
-
-### Status code response handler
-Most of the time, an url should respond a 200 OK status code. This is the default configuration. But sometimes, you may 
-want expect different values to be valid. 302 can be a valid value. We can also want to test the 500 exception page.
-
-In this case you can configure the expected response code in the route configuration :
-```yaml
-lag_smoker:
-    routes:
-        route_with_redirection:
-            handlers:
-                response_code: 302
-        route_with_error:
-            handlers:
-                response_code: 500
-```
-
-### Custom response handler
-You can also add your custom response handler by creating a service which implements 
-`LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface`.
-
-```php
-
-class MyResponseHandler implements LAG\SmokerBundle\Response\Handler\ResponseHandlerInterface
-{
-    public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void
-    {
-        // Check if the html contains the required code...
-    ]
-]
 ```
 
 > The **Colonel** relies on the Symfony [DomCrawler](https://symfony.com/doc/current/components/dom_crawler.html) component and the [Goutte](https://github.com/FriendsOfPHP/Goutte) client.
+
+## Known Issues
+In dev environment, we call the Symfony Client to many times when having the server on the same machine (when using the 
+Symfony web server for example), the cache miss to retrieve value and throws an exception. It causes some build failures.
+A patch is in progress to avoid this.
+
+
+## Road map
+- [ ] Add an option to set a timeout in tests to avoid error with the cache

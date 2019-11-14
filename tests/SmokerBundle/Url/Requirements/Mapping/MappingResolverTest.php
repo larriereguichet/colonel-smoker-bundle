@@ -2,9 +2,9 @@
 
 namespace LAG\SmokerBundle\Tests\Url\Requirements\Mapping;
 
+use LAG\SmokerBundle\Contracts\Requirements\Mapping\MappingResolverInterface;
 use LAG\SmokerBundle\Tests\BaseTestCase;
 use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolver;
-use LAG\SmokerBundle\Url\Requirements\Mapping\MappingResolverInterface;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 
 class MappingResolverTest extends BaseTestCase
@@ -55,10 +55,7 @@ class MappingResolverTest extends BaseTestCase
             ])
             ->resolve('default', 'my_little_route')
         ;
-        $this->assertInternalType('array', $data);
-        $this->assertArrayHasKey('panda', $data);
-        $this->assertArrayHasKey('provider', $data['panda']);
-        $this->assertEquals('default', $data['panda']['provider']);
+        $this->assertEquals([], $data);
     }
 
     private function createResolver(array $mapping)

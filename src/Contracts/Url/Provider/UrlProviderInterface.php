@@ -1,8 +1,10 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Provider;
+namespace LAG\SmokerBundle\Contracts\Url\Provider;
 
+use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Url\Collection\UrlCollection;
+use LAG\SmokerBundle\Url\UrlInfo;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 interface UrlProviderInterface
@@ -17,22 +19,25 @@ interface UrlProviderInterface
     public function getCollection(array $options = []): UrlCollection;
 
     /**
-     * Return the route matching the given path.
+     * Return the route matching the given url. Throws an exception if the url can not be matched. The "supports()"
+     * method should be called before matching an url.
      *
-     * @param string $path
+     * @param string $url
      *
-     * @return string
+     * @throws Exception
+     *
+     * @return UrlInfo
      */
-    public function match(string $path): string;
+    public function match(string $url): UrlInfo;
 
     /**
-     * Return true if the given path is supported by the provider.
+     * Return true if the given url is supported by the provider.
      *
-     * @param string $path
+     * @param string $url
      *
      * @return bool
      */
-    public function supports(string $path): bool;
+    public function supports(string $url): bool;
 
     /**
      * Configure options to be passed to the getCollection() method.

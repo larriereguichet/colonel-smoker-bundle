@@ -2,7 +2,7 @@
 
 namespace LAG\SmokerBundle\DependencyInjection\CompilerPass;
 
-use LAG\SmokerBundle\Url\Provider\UrlProviderInterface;
+use LAG\SmokerBundle\Contracts\Url\Provider\UrlProviderInterface;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -12,6 +12,9 @@ class UrlProviderCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
+        if (!$container->hasDefinition(UrlProviderRegistry::class)) {
+            return;
+        }
         $registry = $container->getDefinition(UrlProviderRegistry::class);
 
         foreach ($container->getDefinitions() as $serviceId => $definition) {

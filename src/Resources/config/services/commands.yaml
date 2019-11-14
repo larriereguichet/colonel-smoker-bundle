@@ -13,7 +13,7 @@ services:
         class: LAG\SmokerBundle\Command\SmokeCommand
         arguments:
             - '%kernel.cache_dir%'
-            - '%lag_smoker.host%'
+            - '%lag_smoker.routing%'
             - '%lag_smoker.routes%'
             - '@LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry'
             - '@LAG\SmokerBundle\Url\Registry\UrlProviderRegistry'

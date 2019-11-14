@@ -16,7 +16,7 @@ class LAGSmokerExtension extends Extension
 
         $loader = new YamlFileLoader(
             $container,
-            new FileLocator(__DIR__.'/../Resources/config')
+            new FileLocator(__DIR__.'/../Resources/config/services')
         );
         $loader->load('collectors.yaml');
         $loader->load('commands.yaml');
@@ -27,7 +27,7 @@ class LAGSmokerExtension extends Extension
 
         $container->setParameter('lag_smoker.mapping', $config['mapping']);
         $container->setParameter('lag_smoker.routes', $config['routes']);
-        $container->setParameter('lag_smoker.host', $config['host']);
+        $container->setParameter('lag_smoker.routing', $config['routing']);
     }
 
     public function getAlias()

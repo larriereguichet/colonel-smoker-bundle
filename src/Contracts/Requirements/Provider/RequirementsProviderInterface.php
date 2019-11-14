@@ -1,7 +1,8 @@
 <?php
 
-namespace LAG\SmokerBundle\Url\Requirements\Provider;
+namespace LAG\SmokerBundle\Contracts\Requirements\Provider;
 
+use LAG\SmokerBundle\Contracts\DataProvider\DataProviderInterface;
 use LAG\SmokerBundle\Exception\Exception;
 use Traversable;
 
@@ -30,7 +31,11 @@ interface RequirementsProviderInterface
      *
      * @return Traversable
      */
-    public function getRequirements(string $routeName, array $options = []): Traversable;
+    public function getRequirementsData(string $routeName, array $options = []): Traversable;
+
+    public function getRequirements(string $routeName): array;
+
+    public function getDataProvider(): DataProviderInterface;
 
     /**
      * Return the provider name.
