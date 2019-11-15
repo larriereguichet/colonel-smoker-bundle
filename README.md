@@ -114,3 +114,4 @@ A patch is in progress to avoid this.
 
 ## Road map
 - [ ] Add an option to set a timeout in tests to avoid error with the cache
+- [ ] Add a check to see if the web server is running
