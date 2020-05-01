@@ -46,12 +46,6 @@ class SymfonyUrlProvider implements UrlProviderInterface
 
     /**
      * SymfonyRoutingProvider constructor.
-     *
-     * @param array                        $routingConfiguration
-     * @param array                        $routes
-     * @param array                        $mapping
-     * @param RouterInterface              $router
-     * @param RequirementsProviderRegistry $requirementsProviderRegistry
      */
     public function __construct(
         array $routingConfiguration,
@@ -192,10 +186,6 @@ class SymfonyUrlProvider implements UrlProviderInterface
 
     /**
      * Return a generator containing each set of parameters according to the providers.
-     *
-     * @param string $routeName
-     *
-     * @return Generator
      */
     protected function getRouteRequirements(string $routeName): Generator
     {
@@ -218,10 +208,6 @@ class SymfonyUrlProvider implements UrlProviderInterface
 
     /**
      * Return true if the given route requires parameters to be generated.
-     *
-     * @param Route $route
-     *
-     * @return bool
      */
     protected function hasRouteRequirements(Route $route): bool
     {

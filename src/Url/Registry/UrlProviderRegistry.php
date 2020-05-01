@@ -14,8 +14,6 @@ class UrlProviderRegistry
      * Add a new url provider to the registry. If a provider with the same name is already registered, an exception will
      * be thrown.
      *
-     * @param UrlProviderInterface $provider
-     *
      * @throws Exception
      */
     public function add(UrlProviderInterface $provider): void
@@ -28,10 +26,6 @@ class UrlProviderRegistry
 
     /**
      * Return an url provider matching the given name. If none exists, an exception will be thrown?
-     *
-     * @param string $name
-     *
-     * @return UrlProviderInterface
      *
      * @throws Exception
      */
@@ -46,10 +40,6 @@ class UrlProviderRegistry
 
     /**
      * Return true if a provider with the given name is registered in the registry.
-     *
-     * @param string $name
-     *
-     * @return bool
      */
     public function has(string $name): bool
     {
@@ -67,10 +57,6 @@ class UrlProviderRegistry
     /**
      * Return information about the given url like the http parts of the url (host, scheme...), the route name and some
      * extra data according to the provider.
-     *
-     * @param string $url
-     *
-     * @return UrlInfo
      *
      * @throws Exception
      */

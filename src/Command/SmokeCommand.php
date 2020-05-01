@@ -2,9 +2,9 @@
 
 namespace LAG\SmokerBundle\Command;
 
+use Goutte\Client;
 use LAG\SmokerBundle\Message\MessageCollectorInterface;
 use LAG\SmokerBundle\Response\Registry\ResponseHandlerRegistry;
-use Goutte\Client;
 use LAG\SmokerBundle\Url\Registry\UrlProviderRegistry;
 use LAG\SmokerBundle\Url\Url;
 use LAG\SmokerBundle\Url\UrlInfo;
@@ -86,14 +86,6 @@ class SmokeCommand extends Command
 
     /**
      * SmokeCommand constructor.
-     *
-     * @param string                    $cacheDir
-     * @param array                     $routing
-     * @param array                     $routes
-     * @param ResponseHandlerRegistry   $responseHandlerRegistry
-     * @param UrlProviderRegistry       $urlProviderRegistry
-     * @param MessageCollectorInterface $messageCollector
-     * @param Environment               $twig
      */
     public function __construct(
         string $cacheDir,
@@ -230,13 +222,6 @@ class SmokeCommand extends Command
     }
 
     /**
-     * @param UrlInfo  $urlInfo
-     * @param Url      $url
-     * @param Crawler  $crawler
-     * @param Response $response
-     *
-     * @return bool
-     *
      * @throws \Exception
      */
     protected function handleResponse(UrlInfo $urlInfo, Url $url, Crawler $crawler, Response $response): bool

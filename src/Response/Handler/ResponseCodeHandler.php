@@ -2,8 +2,8 @@
 
 namespace LAG\SmokerBundle\Response\Handler;
 
-use LAG\SmokerBundle\Exception\Exception;
 use Goutte\Client;
+use LAG\SmokerBundle\Exception\Exception;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 

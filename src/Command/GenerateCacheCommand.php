@@ -47,11 +47,6 @@ class GenerateCacheCommand extends Command
 
     /**
      * GenerateCacheCommand constructor.
-     *
-     * @param string                    $cacheDir
-     * @param array                     $routesConfiguration
-     * @param UrlProviderRegistry       $registry
-     * @param MessageCollectorInterface $messageCollector
      */
     public function __construct(
         string $cacheDir,

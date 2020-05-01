@@ -33,10 +33,6 @@ class ORMRequirementsProvider implements RequirementsProviderInterface
 
     /**
      * RequirementsProvider constructor.
-     *
-     * @param MappingResolverInterface $mappingResolver
-     * @param RouterInterface          $router
-     * @param DataProviderInterface    $dataProvider
      */
     public function __construct(
         MappingResolverInterface $mappingResolver,
@@ -141,12 +137,6 @@ class ORMRequirementsProvider implements RequirementsProviderInterface
     }
 
     /**
-     * @param array  $row
-     * @param string $routeName
-     * @param array  $mapping
-     *
-     * @return array
-     *
      * @throws Exception
      */
     private function processRow(array $row, string $routeName, array $mapping): array
@@ -158,11 +148,7 @@ class ORMRequirementsProvider implements RequirementsProviderInterface
 
         foreach ($requirements as $name => $requirement) {
             if (!key_exists($name, $mapping['requirements'])) {
-                throw new Exception(sprintf(
-                    'The requirement "%s" for the route "%s" is not provided',
-                    $name,
-                    $routeName
-                ));
+                throw new Exception(sprintf('The requirement "%s" for the route "%s" is not provided', $name, $routeName));
             }
             $property = $mapping['requirements'][$name];
 

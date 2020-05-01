@@ -39,81 +39,51 @@ class UrlInfo
         $this->extra = $extra;
     }
 
-    /**
-     * @return string
-     */
     public function getScheme(): string
     {
         return $this->scheme;
     }
 
-    /**
-     * @return string
-     */
     public function getHost(): string
     {
         return $this->host;
     }
 
-    /**
-     * @return int
-     */
     public function getPort(): int
     {
         return $this->port;
     }
 
-    /**
-     * @return string
-     */
     public function getUser(): string
     {
         return $this->user;
     }
 
-    /**
-     * @return string
-     */
     public function getPass(): string
     {
         return $this->pass;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * @return string
-     */
     public function getQuery(): string
     {
         return $this->query;
     }
 
-    /**
-     * @return string
-     */
     public function getFragment(): string
     {
         return $this->fragment;
     }
 
-    /**
-     * @return string
-     */
     public function getRouteName(): string
     {
         return $this->routeName;
     }
 
-    /**
-     * @return array
-     */
     public function getExtra(): array
     {
         return $this->extra;

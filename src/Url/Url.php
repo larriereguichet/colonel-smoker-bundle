@@ -23,10 +23,6 @@ class Url
 
     /**
      * Url constructor.
-     *
-     * @param string $location
-     * @param string $providerName
-     * @param array  $options
      */
     public function __construct(string $location, string $providerName, array $options = [])
     {
@@ -55,25 +51,16 @@ class Url
         );
     }
 
-    /**
-     * @return string
-     */
     public function getLocation(): string
     {
         return $this->location;
     }
 
-    /**
-     * @return string
-     */
     public function getProviderName(): string
     {
         return $this->providerName;
     }
 
-    /**
-     * @return array
-     */
     public function getOptions(): array
     {
         return $this->options;

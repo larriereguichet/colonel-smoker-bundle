@@ -98,8 +98,6 @@ class HtmlHandler extends AbstractHandler
 
     /**
      * Return the unique name of the response handler.
-     *
-     * @return string
      */
     public function getName(): string
     {

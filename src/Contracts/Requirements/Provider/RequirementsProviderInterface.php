@@ -10,10 +10,6 @@ interface RequirementsProviderInterface
 {
     /**
      * Return true if the given route name is supported by the provider.
-     *
-     * @param string $routeName
-     *
-     * @return bool
      */
     public function supports(string $routeName): bool;
 
@@ -24,12 +20,7 @@ interface RequirementsProviderInterface
      * The provider could throw an exception if the routing configuration does not match with the mapping configured by
      * the user.
      *
-     * @param string $routeName
-     * @param array  $options
-     *
      * @throws Exception
-     *
-     * @return Traversable
      */
     public function getRequirementsData(string $routeName, array $options = []): Traversable;
 
@@ -39,8 +30,6 @@ interface RequirementsProviderInterface
 
     /**
      * Return the provider name.
-     *
-     * @return string
      */
     public function getName(): string;
 }

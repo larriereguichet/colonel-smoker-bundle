@@ -11,15 +11,10 @@ abstract class AbstractHandler implements ResponseHandlerInterface
      */
     protected $configuration = [];
 
-    /**
-     * @return string
-     */
     abstract public function getName(): string;
 
     /**
      * ResponseCodeHandler constructor.
-     *
-     * @param array $configuration
      */
     public function __construct(array $configuration = [])
     {
