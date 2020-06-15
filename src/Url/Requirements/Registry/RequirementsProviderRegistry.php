@@ -2,27 +2,19 @@
 
 namespace LAG\SmokerBundle\Url\Requirements\Registry;
 
-use LAG\SmokerBundle\Exception\Exception;
 use LAG\SmokerBundle\Contracts\Requirements\Provider\RequirementsProviderInterface;
+use LAG\SmokerBundle\Exception\Exception;
 
 class RequirementsProviderRegistry
 {
     protected $registry = [];
 
-    /**
-     * @param string                        $name
-     * @param RequirementsProviderInterface $provider
-     */
     public function add(string $name, RequirementsProviderInterface $provider): void
     {
         $this->registry[$name] = $provider;
     }
 
     /**
-     * @param string $name
-     *
-     * @return RequirementsProviderInterface
-     *
      * @throws Exception
      */
     public function get(string $name): RequirementsProviderInterface
@@ -34,11 +26,6 @@ class RequirementsProviderRegistry
         return $this->registry[$name];
     }
 
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
     public function has(string $name): bool
     {
         return key_exists($name, $this->registry);

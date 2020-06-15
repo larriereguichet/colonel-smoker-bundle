@@ -21,8 +21,6 @@ class MessageCollector implements MessageCollectorInterface
 
     /**
      * MessageCollector constructor.
-     *
-     * @param string $cacheDirectory
      */
     public function __construct(string $cacheDirectory)
     {

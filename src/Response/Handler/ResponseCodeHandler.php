@@ -2,8 +2,8 @@
 
 namespace LAG\SmokerBundle\Response\Handler;
 
-use LAG\SmokerBundle\Exception\Exception;
 use Goutte\Client;
+use LAG\SmokerBundle\Exception\Exception;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,7 +26,7 @@ class ResponseCodeHandler extends AbstractHandler
         if (null === $client->getResponse()) {
             throw new Exception('The client has no response. It should make a request before handle a response');
         }
-        $responseCode = $client->getResponse()->getStatus();
+        $responseCode = $client->getResponse()->getStatusCode();
 
         if ((string) $expectedResponseCode !== (string) $responseCode) {
             throw new Exception('Excepted code '.$expectedResponseCode.', got '.$responseCode.' for route '.$routeName);

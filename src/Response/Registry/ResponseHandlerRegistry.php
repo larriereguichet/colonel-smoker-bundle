@@ -9,20 +9,12 @@ class ResponseHandlerRegistry
 {
     protected $registry = [];
 
-    /**
-     * @param string                   $name
-     * @param ResponseHandlerInterface $handler
-     */
     public function add(string $name, ResponseHandlerInterface $handler): void
     {
         $this->registry[$name] = $handler;
     }
 
     /**
-     * @param string $name
-     *
-     * @return ResponseHandlerInterface
-     *
      * @throws Exception
      */
     public function get(string $name): ResponseHandlerInterface
@@ -34,11 +26,6 @@ class ResponseHandlerRegistry
         return $this->registry[$name];
     }
 
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
     public function has(string $name): bool
     {
         return key_exists($name, $this->registry);

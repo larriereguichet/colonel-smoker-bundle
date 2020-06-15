@@ -10,10 +10,6 @@ interface ResponseHandlerInterface
 {
     /**
      * Return true if the given route name is supported by the response handler.
-     *
-     * @param string $routeName
-     *
-     * @return bool
      */
     public function supports(string $routeName): bool;
 
@@ -22,19 +18,12 @@ interface ResponseHandlerInterface
      * expectations, an exception will be thrown. An exception will be thrown if the dom crawler is not
      * initialized before passing it to the response handler.
      *
-     * @param string  $routeName
-     * @param Crawler $crawler
-     * @param Client  $client
-     * @param array   $options
-     *
      * @throws Exception
      */
     public function handle(string $routeName, Crawler $crawler, Client $client, array $options = []): void;
 
     /**
      * Return the unique name of the response handler.
-     *
-     * @return string
      */
     public function getName(): string;
 }
