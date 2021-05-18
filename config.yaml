@@ -1,0 +1,33 @@
+lag_smoker:
+    ecxludes:
+        symfony: ~
+    paths:
+        my_homepage:
+            type: route
+            handlers:
+                response_code: 200
+                html:
+                    contains: '<h1>Homepage</h1>'
+        my_url:
+            type: url
+            options:
+                path: /my-page
+        my_collection:
+            type: route_collection
+            options:
+                match: 'admin_*'
+                excludes: admin_login
+        my_url_collection:
+            type: url_collection
+            options:
+                match: /login/*
+        my_collection_with_parameters:
+            type: route_collection
+            data_provider: my_provider
+    data_providers:
+        my_provider:
+            type: orm
+            options:
+                class: App\Entity\MyEntity
+                data:
+                    id: getId

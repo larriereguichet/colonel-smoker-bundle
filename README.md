@@ -111,7 +111,7 @@ In dev environment, we call the Symfony Client to many times when having the ser
 Symfony web server for example), the cache miss to retrieve value and throws an exception. It causes some build failures.
 A patch is in progress to avoid this.
 
-## Road map
+## Road map
 
 - [ ] Add an option to set a timeout in tests to avoid error with the cache
 - [ ] Add a check to see if the web server is running
